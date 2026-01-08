@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dynamic Finance Pro Max</title>
+    <style>
+        :root {
+            --purple: #a855f7; --bg: #0f172a; --card: #1e293b; --text: #ffffff;
+            --red: #ef4444; --blue: #3b82f6; --orange: #f59e0b; --green: #10b981;
+        }
+        body { 
+            font-family: sans-serif; background: var(--bg); color: var(--text); 
+            margin: 0; padding: 15px; padding-bottom: 100px;
+        }
+        
+        .header { text-align: center; margin-bottom: 15px; }
+        .total-spend { font-size: 2.2rem; font-weight: 800; color: var(--text); }
+        .month-label { color: var(--purple); font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        .chart-box {
+            width: 170px; height: 170px; border-radius: 50%;
+            margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;
+            background: conic-gradient(#334155 0% 100%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .chart-inner {
+            width: 140px; height: 140px; background: var(--bg);
+            border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            transition: all 0.5s ease;
+        }
+        .cat-card { text-align: center; transition: transform 0.3s ease; }
+        .icon-circle {
+            width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; background: var(--card); border: 2px solid #334155;
+        }
+        .cat-name { font-size: 0.55rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;}
+        .cat-amt { font-size: 0.7rem; font-weight: bold; }
+
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--card); padding: 10px 0; display: flex;
+            justify-content: space-around; z-index: 100; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn { background: none; border: none; color: white; font-size: 0.65rem; text-align: center; opacity: 0.6; }
+        .btn-add { background: var(--purple); width: 55px; height: 55px; border-radius: 50%; margin-top: -35px; font-size: 1.8rem; opacity: 1; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        #historyView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .list-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #334155; }
+        .btn-del { background: none; border: 1px solid var(--red); color: var(--red); padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; margin-left: 10px; }
+
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:300; }
+        .modal-content { background: var(--card); margin: 10% auto; padding: 20px; border-radius: 20px; width: 85%; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; background: #0f172a; color: white; font-size: 16px; box-sizing: border-box;}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="month-label" id="mLabel">MONTH</div>
+        <div class="total-spend" id="mTotal">₹0</div>
+    </div>
+
+    <div class="chart-box" id="mainRing">
+        <div class="chart-inner">
+            <span style="opacity:0.5; font-size:0.6rem;">SPENT TODAY</span>
+            <span id="tTotal" style="font-size:1.3rem; font-weight:bold;">₹0</span>
+        </div>
+    </div>
+
+    <div id="catGrid" class="grid"></div>
+
+    <div class="bottom-bar">
+        <button class="nav-btn" onclick="toggleHistory(true)">📊<br>INSIGHTS</button>
+        <button class="nav-btn btn-add" onclick="toggleModal(true)">+</button>
+        <button class="nav-btn" onclick="exportCSV()">📥<br>EXPORT</button>
+    </div>
+
+    <div id="historyView">
+        <button onclick="toggleHistory(false)" style="float:right; background:var(--card); border:none; color:white; padding:8px 15px; border-radius:8px;">Back</button>
+        <h2 id="histHeader">History</h2>
+        <div id="historySummary" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:20px;"></div>
+        <div id="historyList"></div>
+    </div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0">New Expense</h3>
+            <input type="text" id="desc" placeholder="What was it?">
+            <input type="number" id="amt" placeholder="Amount" inputmode="decimal">
+            <select id="cat">
+                <option value="Rent">🏢 Rent</option>
+                <option value="Education">🎓 Education Fee</option>
+                <option value="Credit Card">💳 Credit Card Bill</option>
+                <option value="Phone Bill">📱 Phone Bill</option>
+                <option value="LIC">🛡️ LIC Payment</option>
+                <option value="Cigarette">🚬 Cigarette</option>
+                <option value="Milk">🥛 Milk</option>
+                <option value="OTT">📺 OTT Subs</option>
+                <option value="Zomato">🛵 Zomato</option>
+                <option value="Swiggy">🧡 Swiggy</option>
+                <option value="Pet">🐾 Pet</option>
+                <option value="Shopping">🛍️ Shopping</option>
+                <option value="Clothing">👕 Clothing</option>
+                <option value="Transport">🚗 Transport</option>
+                <option value="Home">🏠 Home</option>
+                <option value="Others">🌀 Others</option>
+            </select>
+            <button onclick="save()" style="width:100%; padding:15px; background:var(--purple); border:none; color:white; border-radius:10px; font-weight:bold; margin-top:10px;">SAVE</button>
+            <button onclick="toggleModal(false)" style="width:100%; background:none; color:white; border:none; margin-top:10px;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let data = JSON.parse(localStorage.getItem('fin_vFinal_Max')) || [];
+        
+        let cats = [
+            { id: 'Rent', icon: '🏢', color: '#6366f1' },
+            { id: 'Education', icon: '🎓', color: '#f43f5e' },
+            { id: 'Credit Card', icon: '💳', color: '#f87171' },
+            { id: 'Phone Bill', icon: '📱', color: '#60a5fa' },
+            { id: 'LIC', icon: '🛡️', color: '#34d399' },
+            { id: 'Cigarette', icon: '🚬', color: '#fbbf24' },
+            { id: 'Milk', icon: '🥛', color: '#fb7185' },
+            { id: 'OTT', icon: '📺', color: '#a78bfa' },
+            { id: 'Zomato', icon: '🛵', color: '#e11d48' },
+            { id: 'Swiggy', icon: '🧡', color: '#f97316' },
+            { id: 'Pet', icon: '🐾', color: '#818cf8' },
+            { id: 'Shopping', icon: '🛍️', color: '#94a3b8' },
+            { id: 'Clothing', icon: '👕', color: '#c084fc' },
+            { id: 'Transport', icon: '🚗', color: '#2dd4bf' },
+            { id: 'Home', icon: '🏠', color: '#fb923c' },
+            { id: 'Others', icon: '🌀', color: '#64748b' }
+        ];
+
+        function toggleModal(s) { document.getElementById('modal').style.display = s ? 'block' : 'none'; }
+        function toggleHistory(s) { document.getElementById('historyView').style.display = s ? 'block' : 'none'; }
+
+        function update() {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currM = now.getMonth();
+            const currY = now.getFullYear();
+            const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            document.getElementById('mLabel').innerText = monthName;
+            document.getElementById('histHeader').innerText = monthName + " Breakdown";
+
+            let mt = 0, tt = 0, cSums = {};
+            let listH = "";
+
+            data.sort((a,b) => b.id - a.id).forEach((x) => {
+                const d = new Date(x.id);
+                if(d.getMonth() === currM && d.getFullYear() === currY) {
+                    const a = parseFloat(x.amt);
+                    mt += a;
+                    if(d.toISOString().split('T')[0] === todayStr) tt += a;
+                    cSums[x.cat] = (cSums[x.cat] || 0) + a;
+                    listH += `<div class="list-item">
+                        <span><b>${x.desc}</b><br><small style="color:var(--purple)">${x.cat}</small></span>
+                        <span style="text-align:right">
+                            <b style="display:block">₹${a}</b>
+                            <button class="btn-del" onclick="deleteEntry(${x.id})">Del</button>
+                        </span>
+                    </div>`;
+                }
+            });
+
+            // Dynamic Sorting Logic
+            cats.sort((a, b) => {
+                const valA = cSums[a.id] || 0;
+                const valB = cSums[b.id] || 0;
+                if (valB !== valA) return valB - valA; 
+                return a.id.localeCompare(b.id); 
+            });
+
+            let g = "", cP = 0, gridH = "", summH = "<b>Month Summary</b><br>";
+            
+            cats.forEach(c => {
+                const v = cSums[c.id] || 0;
+                const p = mt > 0 ? (v/mt)*100 : 0;
+                if(v > 0) {
+                    g += `, ${c.color} ${cP}% ${cP+p}%`;
+                    cP += p;
+                    summH += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:2px 0;"><span>${c.icon} ${c.id}</span><span>₹${v}</span></div>`;
+                }
+                gridH += `<div class="cat-card">
+                    <div class="icon-circle" style="border-color:${v > 0 ? c.color : '#334155'}">${c.icon}</div>
+                    <div class="cat-amt">₹${v}</div>
+                    <div class="cat-name">${c.id}</div>
+                </div>`;
+            });
+
+            document.getElementById('mainRing').style.background = `conic-gradient(#334155 0%${g})`;
+            document.getElementById('mTotal').innerText = `₹${mt}`;
+            document.getElementById('tTotal').innerText = `₹${tt}`;
+            document.getElementById('catGrid').innerHTML = gridH;
+            document.getElementById('historyList').innerHTML = listH;
+            document.getElementById('historySummary').innerHTML = summH;
+            localStorage.setItem('fin_vFinal_Max', JSON.stringify(data));
+        }
+
+        function save() {
+            const d = document.getElementById('desc').value, a = document.getElementById('amt').value, c = document.getElementById('cat').value;
+            if(d && a) {
+                data.push({ id: Date.now(), desc: d, amt: a, cat: c });
+                document.getElementById('desc').value = ""; document.getElementById('amt').value = "";
+                toggleModal(false); update();
+            }
+        }
+
+        function deleteEntry(id) {
+            if(confirm("Remove this entry?")) {
+                data = data.filter(item => item.id !== id);
+                update();
+            }
+        }
+
+        function exportCSV() {
+            let csv = "Date,Description,Category,Amount\n";
+            data.forEach(ex => { csv += `${new Date(ex.id).toLocaleDateString()},${ex.desc},${ex.cat},${ex.amt}\n`; });
+            const b = new Blob([csv], { type: 'text/csv' });
+            const u = window.URL.createObjectURL(b);
+            const a = document.createElement('a'); a.href = u; a.download = 'Expenses_Final.csv'; a.click();
+        }
+
+        update();
+    </script>
+</body>
+</html>
