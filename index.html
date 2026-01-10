@@ -22,8 +22,10 @@
         .mini-ring {
             width: 80px; height: 80px; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            background: #1e293b; position: relative;
+            background: #1e293b; position: relative; cursor: pointer;
+            transition: transform 0.2s;
         }
+        .mini-ring:active { transform: scale(0.9); }
         .mini-ring::before { content: ''; position: absolute; inset: 4px; background: var(--bg); border-radius: 50%; }
         .mini-content { position: relative; text-align: center; z-index: 1; }
         .mini-label { font-size: 0.5rem; opacity: 0.6; display: block; }
@@ -33,8 +35,10 @@
             width: 170px; height: 170px; border-radius: 50%;
             margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;
             background: conic-gradient(#334155 0% 100%);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: pointer;
+            transition: transform 0.2s;
         }
+        .chart-box:active { transform: scale(0.95); }
         .chart-inner {
             width: 140px; height: 140px; background: var(--bg);
             border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -68,6 +72,7 @@
         .modal-content { background: var(--card); margin: 5% auto; padding: 20px; border-radius: 20px; width: 85%; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; background: #0f172a; color: white; font-size: 16px; box-sizing: border-box;}
         label { font-size: 0.7rem; color: var(--purple); font-weight: bold; margin-left: 5px; }
+        .filter-badge { background: var(--purple); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -78,13 +83,13 @@
     </div>
 
     <div class="card-stats">
-        <div class="mini-ring" style="background: conic-gradient(var(--blue) 100%, #334155 0%);">
+        <div class="mini-ring" onclick="toggleHistory(true, 'Debit')" id="debitRing">
             <div class="mini-content">
                 <span class="mini-label">DEBIT</span>
                 <span id="debitTotal" class="mini-amt" style="color:var(--blue)">₹0</span>
             </div>
         </div>
-        <div class="mini-ring" style="background: conic-gradient(var(--red) 100%, #334155 0%);">
+        <div class="mini-ring" onclick="toggleHistory(true, 'Credit')" id="creditRing">
             <div class="mini-content">
                 <span class="mini-label">CREDIT</span>
                 <span id="creditTotal" class="mini-amt" style="color:var(--red)">₹0</span>
@@ -92,7 +97,7 @@
         </div>
     </div>
 
-    <div class="chart-box" id="mainRing">
+    <div class="chart-box" id="mainRing" onclick="toggleHistory(true)">
         <div class="chart-inner">
             <span style="opacity:0.5; font-size:0.6rem;">SPENT TODAY</span>
             <span id="tTotal" style="font-size:1.3rem; font-weight:bold;">₹0</span>
@@ -110,6 +115,7 @@
     <div id="historyView">
         <button onclick="toggleHistory(false)" style="float:right; background:var(--card); border:none; color:white; padding:8px 15px; border-radius:8px;">Back</button>
         <h2 id="histHeader">History</h2>
+        <div id="activeFilter"></div>
         <div id="historySummary" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:20px;"></div>
         <div id="historyList"></div>
     </div>
@@ -120,7 +126,7 @@
             <label>DESCRIPTION</label>
             <input type="text" id="desc" placeholder="What was it?">
             <label>AMOUNT</label>
-            <input type="number" id="amt" placeholder="Amount" step="0.01">
+            <input type="number" id="amt" placeholder="0.00" step="0.01">
             <label>DATE</label>
             <input type="date" id="entryDate">
             <label>PAYMENT METHOD</label>
@@ -155,9 +161,10 @@
 
     <script>
         let data = JSON.parse(localStorage.getItem('fin_vFinal_Max')) || [];
+        let currentFilter = null;
         document.getElementById('entryDate').valueAsDate = new Date();
 
-        let cats = [
+        const cats = [
             { id: 'Rent', icon: '🏢', color: '#6366f1' }, { id: 'Education', icon: '🎓', color: '#f43f5e' },
             { id: 'Credit Card', icon: '💳', color: '#f87171' }, { id: 'Medicine', icon: '💊', color: '#10b981' },
             { id: 'Phone Bill', icon: '📱', color: '#60a5fa' }, { id: 'LIC', icon: '🛡️', color: '#34d399' },
@@ -170,7 +177,12 @@
         ];
 
         function toggleModal(s) { document.getElementById('modal').style.display = s ? 'block' : 'none'; }
-        function toggleHistory(s) { document.getElementById('historyView').style.display = s ? 'block' : 'none'; }
+        
+        function toggleHistory(s, filter = null) { 
+            currentFilter = filter;
+            document.getElementById('historyView').style.display = s ? 'block' : 'none'; 
+            update();
+        }
 
         function format(num) { 
             return parseFloat(num).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 2}); 
@@ -197,13 +209,24 @@
                     if(x.date === todayStr) tt += val;
                     cSums[x.cat] = (cSums[x.cat] || 0) + val;
                     
-                    const mCol = x.method === 'Debit' ? 'var(--blue)' : 'var(--red)';
-                    listH += `<div class="list-item">
-                        <span><b>${x.desc}</b> <span class="tag" style="border:1px solid ${mCol}; color:${mCol}">${x.method}</span><br><small style="color:var(--purple)">${x.cat} • ${itemDate.toLocaleDateString('en-IN')}</small></span>
-                        <span style="text-align:right"><b style="display:block">₹${format(val)}</b><button class="btn-del" onclick="deleteEntry(${x.id})">Del</button></span>
-                    </div>`;
+                    // Apply Filter for History List
+                    if (!currentFilter || x.method === currentFilter) {
+                        const mCol = x.method === 'Debit' ? 'var(--blue)' : 'var(--red)';
+                        listH += `<div class="list-item">
+                            <span><b>${x.desc}</b> <span class="tag" style="border:1px solid ${mCol}; color:${mCol}">${x.method}</span><br><small style="color:var(--purple)">${x.cat} • ${itemDate.toLocaleDateString('en-IN')}</small></span>
+                            <span style="text-align:right"><b style="display:block">₹${format(val)}</b><button class="btn-del" onclick="deleteEntry(${x.id})">Del</button></span>
+                        </div>`;
+                    }
                 }
             });
+
+            // Filter UI
+            const filterBox = document.getElementById('activeFilter');
+            if(currentFilter) {
+                filterBox.innerHTML = `<div class="filter-badge">Showing: ${currentFilter} Card only <span onclick="toggleHistory(true, null)" style="margin-left:8px; font-weight:bold">✕</span></div>`;
+            } else {
+                filterBox.innerHTML = "";
+            }
 
             cats.sort((a, b) => (cSums[b.id] || 0) - (cSums[a.id] || 0));
 
@@ -219,6 +242,12 @@
                 </div>`;
             });
 
+            // Update Circles with Progress Colors
+            const dPerc = mt > 0 ? (dt/mt)*100 : 0;
+            const cPerc = mt > 0 ? (ct/mt)*100 : 0;
+            document.getElementById('debitRing').style.background = `conic-gradient(var(--blue) ${dPerc}%, #334155 0%)`;
+            document.getElementById('creditRing').style.background = `conic-gradient(var(--red) ${cPerc}%, #334155 0%)`;
+            
             document.getElementById('mainRing').style.background = `conic-gradient(#334155 0%${g})`;
             document.getElementById('mTotal').innerText = `₹${format(mt)}`;
             document.getElementById('tTotal').innerText = `₹${format(tt)}`;
