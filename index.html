@@ -41,7 +41,7 @@
         }
 
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
-        .cat-card { text-align: center; transition: transform 0.3s ease; }
+        .cat-card { text-align: center; }
         .icon-circle {
             width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 4px;
             display: flex; align-items: center; justify-content: center;
@@ -57,7 +57,7 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
         .nav-btn { background: none; border: none; color: white; font-size: 0.65rem; text-align: center; opacity: 0.6; }
-        .btn-add { background: var(--purple); width: 55px; height: 55px; border-radius: 50%; margin-top: -35px; font-size: 1.8rem; opacity: 1; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-add { background: var(--purple); width: 55px; height: 55px; border-radius: 50%; margin-top: -35px; font-size: 1.8rem; opacity: 1; color: white; }
 
         #historyView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .list-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #334155; }
@@ -73,7 +73,7 @@
 <body>
 
     <div class="header">
-        <div class="month-label" id="mLabel">MONTH</div>
+        <div class="month-label" id="mLabel">MONTH YEAR</div>
         <div class="total-spend" id="mTotal">₹0</div>
     </div>
 
@@ -109,18 +109,18 @@
 
     <div id="historyView">
         <button onclick="toggleHistory(false)" style="float:right; background:var(--card); border:none; color:white; padding:8px 15px; border-radius:8px;">Back</button>
-        <h2 id="histHeader">Breakdown</h2>
+        <h2 id="histHeader">History</h2>
         <div id="historySummary" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:20px;"></div>
         <div id="historyList"></div>
     </div>
 
     <div id="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0">New Entry</h3>
+            <h3 style="margin-top:0">New Expense</h3>
             <label>DESCRIPTION</label>
             <input type="text" id="desc" placeholder="What was it?">
             <label>AMOUNT</label>
-            <input type="number" id="amt" placeholder="Amount" inputmode="decimal">
+            <input type="number" id="amt" placeholder="Amount" step="0.01">
             <label>DATE</label>
             <input type="date" id="entryDate">
             <label>PAYMENT METHOD</label>
@@ -133,6 +133,7 @@
                 <option value="Rent">🏢 Rent</option>
                 <option value="Education">🎓 Education Fee</option>
                 <option value="Credit Card">💳 Credit Card Bill</option>
+                <option value="Medicine">💊 Medicine</option>
                 <option value="Phone Bill">📱 Phone Bill</option>
                 <option value="LIC">🛡️ LIC Payment</option>
                 <option value="Cigarette">🚬 Cigarette</option>
@@ -147,73 +148,59 @@
                 <option value="Home">🏠 Home</option>
                 <option value="Others">🌀 Others</option>
             </select>
-            <button onclick="save()" style="width:100%; padding:15px; background:var(--purple); border:none; color:white; border-radius:10px; font-weight:bold; margin-top:10px;">SAVE ENTRY</button>
+            <button onclick="save()" style="width:100%; padding:15px; background:var(--purple); border:none; color:white; border-radius:10px; font-weight:bold; margin-top:10px;">SAVE</button>
             <button onclick="toggleModal(false)" style="width:100%; background:none; color:white; border:none; margin-top:10px;">Cancel</button>
         </div>
     </div>
 
     <script>
         let data = JSON.parse(localStorage.getItem('fin_vFinal_Max')) || [];
-        
-        // Set default date in modal to today
         document.getElementById('entryDate').valueAsDate = new Date();
 
         let cats = [
-            { id: 'Rent', icon: '🏢', color: '#6366f1' },
-            { id: 'Education', icon: '🎓', color: '#f43f5e' },
-            { id: 'Credit Card', icon: '💳', color: '#f87171' },
-            { id: 'Phone Bill', icon: '📱', color: '#60a5fa' },
-            { id: 'LIC', icon: '🛡️', color: '#34d399' },
-            { id: 'Cigarette', icon: '🚬', color: '#fbbf24' },
-            { id: 'Milk', icon: '🥛', color: '#fb7185' },
-            { id: 'OTT', icon: '📺', color: '#a78bfa' },
-            { id: 'Zomato', icon: '🛵', color: '#e11d48' },
-            { id: 'Swiggy', icon: '🧡', color: '#f97316' },
-            { id: 'Pet', icon: '🐾', color: '#818cf8' },
-            { id: 'Shopping', icon: '🛍️', color: '#94a3b8' },
-            { id: 'Clothing', icon: '👕', color: '#c084fc' },
-            { id: 'Transport', icon: '🚗', color: '#2dd4bf' },
-            { id: 'Home', icon: '🏠', color: '#fb923c' },
+            { id: 'Rent', icon: '🏢', color: '#6366f1' }, { id: 'Education', icon: '🎓', color: '#f43f5e' },
+            { id: 'Credit Card', icon: '💳', color: '#f87171' }, { id: 'Medicine', icon: '💊', color: '#10b981' },
+            { id: 'Phone Bill', icon: '📱', color: '#60a5fa' }, { id: 'LIC', icon: '🛡️', color: '#34d399' },
+            { id: 'Cigarette', icon: '🚬', color: '#fbbf24' }, { id: 'Milk', icon: '🥛', color: '#fb7185' },
+            { id: 'OTT', icon: '📺', color: '#a78bfa' }, { id: 'Zomato', icon: '🛵', color: '#e11d48' },
+            { id: 'Swiggy', icon: '🧡', color: '#f97316' }, { id: 'Pet', icon: '🐾', color: '#818cf8' },
+            { id: 'Shopping', icon: '🛍️', color: '#94a3b8' }, { id: 'Clothing', icon: '👕', color: '#c084fc' },
+            { id: 'Transport', icon: '🚗', color: '#2dd4bf' }, { id: 'Home', icon: '🏠', color: '#fb923c' },
             { id: 'Others', icon: '🌀', color: '#64748b' }
         ];
 
         function toggleModal(s) { document.getElementById('modal').style.display = s ? 'block' : 'none'; }
         function toggleHistory(s) { document.getElementById('historyView').style.display = s ? 'block' : 'none'; }
 
+        function format(num) { 
+            return parseFloat(num).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 2}); 
+        }
+
         function update() {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const currM = now.getMonth();
             const currY = now.getFullYear();
-            const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
             
-            document.getElementById('mLabel').innerText = monthName;
+            document.getElementById('mLabel').innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
 
             let mt = 0, tt = 0, dt = 0, ct = 0, cSums = {};
             let listH = "";
 
-            // Sort by the chosen entry date
             data.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach((x) => {
-                const d = new Date(x.date);
-                if(d.getMonth() === currM && d.getFullYear() === currY) {
-                    const a = parseFloat(x.amt);
-                    mt += a;
-                    if(x.method === 'Debit') dt += a;
-                    if(x.method === 'Credit') ct += a;
-                    
-                    if(x.date === todayStr) tt += a;
-                    cSums[x.cat] = (cSums[x.cat] || 0) + a;
+                const itemDate = new Date(x.date);
+                if(itemDate.getMonth() === currM && itemDate.getFullYear() === currY) {
+                    const val = parseFloat(x.amt);
+                    mt += val;
+                    if(x.method === 'Debit') dt += val;
+                    if(x.method === 'Credit') ct += val;
+                    if(x.date === todayStr) tt += val;
+                    cSums[x.cat] = (cSums[x.cat] || 0) + val;
                     
                     const mCol = x.method === 'Debit' ? 'var(--blue)' : 'var(--red)';
                     listH += `<div class="list-item">
-                        <span>
-                            <b>${x.desc}</b> <span class="tag" style="border:1px solid ${mCol}; color:${mCol}">${x.method}</span>
-                            <br><small style="color:var(--purple)">${x.cat} • ${d.toLocaleDateString('en-IN')}</small>
-                        </span>
-                        <span style="text-align:right">
-                            <b style="display:block">₹${a}</b>
-                            <button class="btn-del" onclick="deleteEntry(${x.id})">Del</button>
-                        </span>
+                        <span><b>${x.desc}</b> <span class="tag" style="border:1px solid ${mCol}; color:${mCol}">${x.method}</span><br><small style="color:var(--purple)">${x.cat} • ${itemDate.toLocaleDateString('en-IN')}</small></span>
+                        <span style="text-align:right"><b style="display:block">₹${format(val)}</b><button class="btn-del" onclick="deleteEntry(${x.id})">Del</button></span>
                     </div>`;
                 }
             });
@@ -227,16 +214,16 @@
                 if(v > 0) { g += `, ${c.color} ${cP}% ${cP+p}%`; cP += p; }
                 gridH += `<div class="cat-card">
                     <div class="icon-circle" style="border-color:${v > 0 ? c.color : '#334155'}">${c.icon}</div>
-                    <div class="cat-amt">₹${v}</div>
+                    <div class="cat-amt">₹${format(v)}</div>
                     <div class="cat-name">${c.id}</div>
                 </div>`;
             });
 
             document.getElementById('mainRing').style.background = `conic-gradient(#334155 0%${g})`;
-            document.getElementById('mTotal').innerText = `₹${mt}`;
-            document.getElementById('tTotal').innerText = `₹${tt}`;
-            document.getElementById('debitTotal').innerText = `₹${dt}`;
-            document.getElementById('creditTotal').innerText = `₹${ct}`;
+            document.getElementById('mTotal').innerText = `₹${format(mt)}`;
+            document.getElementById('tTotal').innerText = `₹${format(tt)}`;
+            document.getElementById('debitTotal').innerText = `₹${format(dt)}`;
+            document.getElementById('creditTotal').innerText = `₹${format(ct)}`;
             document.getElementById('catGrid').innerHTML = gridH;
             document.getElementById('historyList').innerHTML = listH;
             document.getElementById('historySummary').innerHTML = summH;
@@ -244,29 +231,18 @@
         }
 
         function save() {
-            const d = document.getElementById('desc').value, 
-                  a = document.getElementById('amt').value, 
-                  c = document.getElementById('cat').value, 
-                  m = document.getElementById('method').value,
+            const d = document.getElementById('desc').value, a = document.getElementById('amt').value, 
+                  c = document.getElementById('cat').value, m = document.getElementById('method').value,
                   dt = document.getElementById('entryDate').value;
-            
             if(d && a && dt) {
-                data.push({ id: Date.now(), desc: d, amt: a, cat: c, method: m, date: dt });
-                document.getElementById('desc').value = ""; 
-                document.getElementById('amt').value = "";
-                document.getElementById('entryDate').valueAsDate = new Date();
-                toggleModal(false); 
-                update();
-            } else {
-                alert("Please fill all fields");
+                data.push({ id: Date.now(), desc: d, amt: parseFloat(a).toFixed(2), cat: c, method: m, date: dt });
+                document.getElementById('desc').value = ""; document.getElementById('amt').value = "";
+                toggleModal(false); update();
             }
         }
 
         function deleteEntry(id) {
-            if(confirm("Remove this entry?")) {
-                data = data.filter(item => item.id !== id);
-                update();
-            }
+            if(confirm("Remove this entry?")) { data = data.filter(item => item.id !== id); update(); }
         }
 
         function exportCSV() {
@@ -276,10 +252,7 @@
             });
             const b = new Blob([csv], { type: 'text/csv' });
             const u = window.URL.createObjectURL(b);
-            const a = document.createElement('a'); 
-            a.href = u; 
-            a.download = `Finance_Report_${new Date().toLocaleDateString()}.csv`; 
-            a.click();
+            const a = document.createElement('a'); a.href = u; a.download = `Report_${new Date().toLocaleDateString()}.csv`; a.click();
         }
 
         update();
