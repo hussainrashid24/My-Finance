@@ -11,7 +11,7 @@
         }
         body { 
             font-family: sans-serif; background: var(--bg); color: var(--text); 
-            margin: 0; padding: 15px; padding-bottom: 100px;
+            margin: 0; padding: 15px; padding-bottom: 100px; overflow-x: hidden;
         }
         
         .header { text-align: center; margin-bottom: 15px; }
@@ -45,7 +45,8 @@
         }
 
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
-        .cat-card { text-align: center; }
+        .cat-card { text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+        .cat-card:active { transform: scale(0.9); transition: 0.1s; }
         .icon-circle {
             width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 4px;
             display: flex; align-items: center; justify-content: center;
@@ -83,13 +84,13 @@
     </div>
 
     <div class="card-stats">
-        <div class="mini-ring" onclick="toggleHistory(true, 'Debit')" id="debitRing">
+        <div class="mini-ring" onclick="toggleHistory(true, 'method', 'Debit')" id="debitRing">
             <div class="mini-content">
                 <span class="mini-label">DEBIT</span>
                 <span id="debitTotal" class="mini-amt" style="color:var(--blue)">₹0</span>
             </div>
         </div>
-        <div class="mini-ring" onclick="toggleHistory(true, 'Credit')" id="creditRing">
+        <div class="mini-ring" onclick="toggleHistory(true, 'method', 'Credit')" id="creditRing">
             <div class="mini-content">
                 <span class="mini-label">CREDIT</span>
                 <span id="creditTotal" class="mini-amt" style="color:var(--red)">₹0</span>
@@ -161,7 +162,10 @@
 
     <script>
         let data = JSON.parse(localStorage.getItem('fin_vFinal_Max')) || [];
-        let currentFilter = null;
+        let filterType = null; 
+        let filterVal = null;
+        let pressTimer;
+
         document.getElementById('entryDate').valueAsDate = new Date();
 
         const cats = [
@@ -178,8 +182,9 @@
 
         function toggleModal(s) { document.getElementById('modal').style.display = s ? 'block' : 'none'; }
         
-        function toggleHistory(s, filter = null) { 
-            currentFilter = filter;
+        function toggleHistory(s, type = null, val = null) { 
+            filterType = type;
+            filterVal = val;
             document.getElementById('historyView').style.display = s ? 'block' : 'none'; 
             update();
         }
@@ -209,8 +214,12 @@
                     if(x.date === todayStr) tt += val;
                     cSums[x.cat] = (cSums[x.cat] || 0) + val;
                     
-                    // Apply Filter for History List
-                    if (!currentFilter || x.method === currentFilter) {
+                    // Filter Logic
+                    let show = true;
+                    if(filterType === 'method' && x.method !== filterVal) show = false;
+                    if(filterType === 'category' && x.cat !== filterVal) show = false;
+
+                    if (show) {
                         const mCol = x.method === 'Debit' ? 'var(--blue)' : 'var(--red)';
                         listH += `<div class="list-item">
                             <span><b>${x.desc}</b> <span class="tag" style="border:1px solid ${mCol}; color:${mCol}">${x.method}</span><br><small style="color:var(--purple)">${x.cat} • ${itemDate.toLocaleDateString('en-IN')}</small></span>
@@ -220,13 +229,11 @@
                 }
             });
 
-            // Filter UI
+            // Filter Badge UI
             const filterBox = document.getElementById('activeFilter');
-            if(currentFilter) {
-                filterBox.innerHTML = `<div class="filter-badge">Showing: ${currentFilter} Card only <span onclick="toggleHistory(true, null)" style="margin-left:8px; font-weight:bold">✕</span></div>`;
-            } else {
-                filterBox.innerHTML = "";
-            }
+            if(filterType) {
+                filterBox.innerHTML = `<div class="filter-badge">Filter: ${filterVal} <span onclick="toggleHistory(true, null, null)" style="margin-left:8px; font-weight:bold">✕</span></div>`;
+            } else { filterBox.innerHTML = ""; }
 
             cats.sort((a, b) => (cSums[b.id] || 0) - (cSums[a.id] || 0));
 
@@ -235,14 +242,19 @@
                 const v = cSums[c.id] || 0;
                 const p = mt > 0 ? (v/mt)*100 : 0;
                 if(v > 0) { g += `, ${c.color} ${cP}% ${cP+p}%`; cP += p; }
-                gridH += `<div class="cat-card">
+                
+                gridH += `
+                <div class="cat-card" 
+                     ontouchstart="startPress('${c.id}')" 
+                     ontouchend="endPress()" 
+                     onmousedown="startPress('${c.id}')" 
+                     onmouseup="endPress()">
                     <div class="icon-circle" style="border-color:${v > 0 ? c.color : '#334155'}">${c.icon}</div>
                     <div class="cat-amt">₹${format(v)}</div>
                     <div class="cat-name">${c.id}</div>
                 </div>`;
             });
 
-            // Update Circles with Progress Colors
             const dPerc = mt > 0 ? (dt/mt)*100 : 0;
             const cPerc = mt > 0 ? (ct/mt)*100 : 0;
             document.getElementById('debitRing').style.background = `conic-gradient(var(--blue) ${dPerc}%, #334155 0%)`;
@@ -258,6 +270,14 @@
             document.getElementById('historySummary').innerHTML = summH;
             localStorage.setItem('fin_vFinal_Max', JSON.stringify(data));
         }
+
+        // Long Press Logic
+        function startPress(id) {
+            pressTimer = window.setTimeout(function() {
+                toggleHistory(true, 'category', id);
+            }, 700);
+        }
+        function endPress() { clearTimeout(pressTimer); }
 
         function save() {
             const d = document.getElementById('desc').value, a = document.getElementById('amt').value, 
