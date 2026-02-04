@@ -63,7 +63,7 @@
         .cat-display-name { font-size: 0.5rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; margin-top: 6px; }
         .cat-amt { font-size: 0.75rem; font-weight: 900; }
 
-        /* Activity Log Cards with Labels */
+        /* Activity Log Cards */
         #history, #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:1000; backdrop-filter: blur(12px); }
         .sheet { position: absolute; bottom: 0; width: 100%; background: var(--bg); border-top: 3px solid var(--purple); border-radius: 30px 30px 0 0; padding: 25px; height: 88vh; overflow-y: auto; animation: sheetUp 0.3s ease-out; }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -161,7 +161,6 @@
             <div class="field-box"><label class="field-label">Amount (₹)</label><input type="number" id="amt" placeholder="0"></div>
             <div class="field-box select-wrapper"><label class="field-label">Date</label><input type="date" id="date"></div>
             <div class="field-box select-wrapper"><label class="field-label">Method</label><select id="method"><option value="Debit">Debit / Cash</option><option value="Credit">Credit Card</option></select></div>
-            
             <div class="field-box select-wrapper"><label class="field-label">Category</label><select id="catSelect"></select></div>
             <button class="btn-save" onclick="save()">SAVE TRANSACTION</button>
             <div style="text-align:center; margin-top:20px; font-weight:bold; opacity:0.5" onclick="closeModal()">CANCEL</div>
@@ -192,17 +191,24 @@
 
             data.forEach(x => {
                 const v = parseFloat(x.amt);
-                if (x.cat === 'Salary') { liquidCash += v; }
-                else if (x.cat === 'Credit Card Bill') { liquidCash -= v; totalDebt -= v; }
-                else {
-                    if (x.method === 'Debit') liquidCash -= v;
-                    else totalDebt += v;
+                // FIX: Case-insensitive method check
+                const m = (x.method || "").toLowerCase();
+
+                if (x.cat === 'Salary') { 
+                    liquidCash += v; 
+                } else if (x.cat === 'Credit Card Bill') { 
+                    liquidCash -= v; 
+                    totalDebt -= v; 
+                } else {
+                    if (m === 'debit') liquidCash -= v;
+                    else if (m === 'credit') totalDebt += v;
                 }
+
                 if (new Date(x.date) >= cycleStart) {
                     if (x.cat === 'Salary') currSal += v;
                     else if (x.cat !== 'Credit Card Bill') {
                         spentThisCycle += v;
-                        if (x.method === 'Debit') debitCycle += v; else creditCycle += v;
+                        if (m === 'debit') debitCycle += v; else if (m === 'credit') creditCycle += v;
                         sums[x.cat] = (sums[x.cat] || 0) + v;
                     }
                 }
@@ -214,8 +220,13 @@
             document.getElementById('accBalance').innerText = `₹${liquidCash.toLocaleString()}`;
             
             const badge = document.getElementById('debtBadge');
-            if(totalDebt > 0) { badge.style.display = 'block'; badge.innerText = `DEBT: ₹${totalDebt.toLocaleString()}`; }
-            else { badge.style.display = 'none'; }
+            // Using 0.5 to avoid floating point math display errors
+            if(totalDebt > 0.5) { 
+                badge.style.display = 'block'; 
+                badge.innerText = `DEBT: ₹${Math.round(totalDebt).toLocaleString()}`; 
+            } else { 
+                badge.style.display = 'none'; 
+            }
 
             document.getElementById('debitFill').style.width = (currSal > 0 ? (debitCycle/currSal)*100 : 0) + '%';
             document.getElementById('creditFill').style.width = (currSal > 0 ? (creditCycle/currSal)*100 : 0) + '%';
@@ -224,7 +235,7 @@
 
             let catH = "";
             categories.filter(c => c.id !== 'Salary').forEach(c => {
-                catH += `<div class="cat-item" onclick="showHistory('${c.id}')"><span style="font-size:1.3rem">${c.icon}</span><span class="cat-display-name">${c.name}</span><span class="cat-amt">₹${sums[c.id] || 0}</span></div>`;
+                catH += `<div class="cat-item" onclick="showHistory('${c.id}')"><span style="font-size:1.3rem">${c.icon}</span><span class="cat-display-name">${c.name}</span><span class="cat-amt">₹${(sums[c.id] || 0).toLocaleString()}</span></div>`;
             });
             document.getElementById('catGrid').innerHTML = catH;
             localStorage.setItem('fin_v10', JSON.stringify(data));
@@ -232,18 +243,18 @@
 
         function showHistory(f) { 
             document.getElementById('history').style.display = 'block'; 
-            let filtered = f === 'all' ? data : data.filter(x => x.cat === f || x.method === f);
+            // Case-insensitive filtering for history
+            let filtered = f === 'all' ? data : data.filter(x => x.cat === f || (x.method || "").toLowerCase() === f.toLowerCase());
             
-            // Calculate Total for the Log Summary
             let logTotal = filtered.reduce((acc, curr) => acc + (curr.cat !== 'Salary' ? curr.amt : 0), 0);
             document.getElementById('logTotalAmt').innerText = `₹${logTotal.toLocaleString()}`;
 
             document.getElementById('histList').innerHTML = [...filtered].reverse().map(x => `
-                <div class="log-card" style="border-left-color: ${x.method === 'Debit' ? 'var(--blue)' : 'var(--red)'}">
+                <div class="log-card" style="border-left-color: ${(x.method || "").toLowerCase() === 'debit' ? 'var(--blue)' : 'var(--red)'}">
                     <div class="log-info">
                         <div>
                             <b>${x.desc}</b>
-                            <span class="method-label" style="background:${x.method==='Debit'?'rgba(59,130,246,0.2)':'rgba(255,77,77,0.2)'}; color:${x.method==='Debit'?'var(--blue)':'var(--red)'}">${x.method}</span>
+                            <span class="method-label" style="background:${(x.method || "").toLowerCase()==='debit'?'rgba(59,130,246,0.2)':'rgba(255,77,77,0.2)'}; color:${(x.method || "").toLowerCase()==='debit'?'var(--blue)':'var(--red)'}">${x.method}</span>
                         </div>
                         <small>${x.date} • ${x.cat}</small>
                     </div>
@@ -268,4 +279,3 @@
     </script>
 </body>
 </html>
-
