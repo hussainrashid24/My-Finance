@@ -13,13 +13,15 @@
         
         body { 
             font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); 
-            margin: 0; padding: 12px; padding-bottom: 90px; overflow-x: hidden;
+            margin: 0; padding: 15px; padding-bottom: 90px; overflow-x: hidden;
         }
 
         /* Intelligence Header */
         .intel-header { 
             background: linear-gradient(135deg, #1e293b, #0f172a); padding: 25px 18px; 
-            border-radius: 24px; text-align: center; margin-bottom: 15px; border: 1px solid #334155; 
+            border-radius: 24px; text-align: center;
+            margin-top: 30px; 
+            margin-bottom: 15px; border: 1px solid #334155; 
         }
         .daily-budget { color: var(--green); font-size: 2.5rem; font-weight: 900; margin: 5px 0; text-shadow: 0 0 15px rgba(0,255,157,0.3); }
         .days-meta { font-size: 0.65rem; opacity: 0.6; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
@@ -27,7 +29,7 @@
         /* FIXED: Inset Neon Cards */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .stat-card { 
-            background: var(--card); padding: 16px; border-radius: 20px; 
+            background: var(--card); padding: 22px; border-radius: 20px; 
             border: 1px solid rgba(255,255,255,0.05);
             position: relative; overflow: hidden; transition: 0.3s;
             box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 0 var(--purple);
@@ -44,29 +46,58 @@
         .stat-val { font-size: 1.2rem; font-weight: 900; display: block; margin-top: 4px; }
         .stat-name { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; font-weight: bold; }
 
-        /* Thick Neon Bars */
-        .pb-container { margin-bottom: 20px; padding: 0 5px; }
-        .pb-group { cursor: pointer; margin-bottom: 12px; }
-        .pb-label { font-size: 0.75rem; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        /* Adjusted: Grid for perfect center alignment */
+        .pb-container { margin-bottom: 25px; padding: 0 5px; }
+        .pb-group { cursor: pointer; margin-bottom: 20px; }
+        .pb-label { 
+            font-size: 0.72rem; 
+            font-weight: 900; 
+            margin-bottom: 8px; 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr; 
+            align-items: center; 
+        }
         .pb-bg { width: 100%; height: 22px; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
         .pb-fill { height: 100%; width: 0%; transition: width 1s ease-out; border-radius: 10px; }
 
         /* Category Grid */
-        .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 5px; }
+        .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 5px; }
         .cat-item { 
-            background: rgba(255,255,255,0.03); padding: 10px 5px; border-radius: 30px; 
+            background: rgba(255,255,255,0.03); padding: 10px 5px; border-radius: 25px; 
             text-align: center; border: 1px solid rgba(255,255,255,0.05);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.2s; height: 65px;
+            transition: 0.2s; height: 60px;
         }
         .cat-item:active { transform: scale(0.85); background: rgba(168, 85, 247, 0.15); }
         .cat-display-name { font-size: 0.5rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; margin-top: 6px; }
         .cat-amt { font-size: 0.75rem; font-weight: 900; }
 
-        /* Activity Log Cards */
-        #history, #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:1000; backdrop-filter: blur(12px); }
-        .sheet { position: absolute; bottom: 0; width: 100%; background: var(--bg); border-top: 3px solid var(--purple); border-radius: 30px 30px 0 0; padding: 25px; height: 88vh; overflow-y: auto; animation: sheetUp 0.3s ease-out; }
+                /* Activity Log Cards */
+        #history, #modal { 
+            display:none; 
+            position:fixed; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%; 
+            background:rgba(0,0,0,0.92); 
+            z-index:1000; 
+            backdrop-filter: blur(12px); 
+            overflow-y: auto; /* Adds scrolling for the whole modal */
+        }
+        .sheet { 
+            position: relative; /* Changed from absolute */
+            margin-top: 5vh;    /* Pushes it down so it's not glued to the top */
+            width: 100%; 
+            background: var(--bg); 
+            border-top: 3px solid var(--purple); 
+            border-radius: 30px 30px 0 0; 
+            padding: 25px; 
+            min-height: 95vh; 
+            animation: sheetUp 0.3s ease-out; 
+        }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
 
         .log-summary { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
         .log-summary span { font-size: 0.7rem; font-weight: 900; opacity: 0.6; text-transform: uppercase; }
@@ -99,6 +130,29 @@
 
         .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11, 15, 26, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid #334155; z-index: 100; }
         .add-btn { background: var(--purple); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: white; margin-top: -50px; border: 6px solid var(--bg); box-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
+        
+              /* ADD THIS BLOCK BELOW */
+        .glow-orange { 
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.6) !important; 
+            border: 1px solid rgba(255, 165, 0, 0.9) !important; 
+            background: rgba(255, 165, 0, 0.1) !important;
+        }
+
+   /* PASTE THE RED BLOCK HERE */
+        .glow-red { 
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.7) !important; 
+            border: 1px solid rgba(255, 77, 77, 1) !important; 
+            background: rgba(255, 77, 77, 0.15) !important;
+            animation: pulse-red 1.5s infinite; 
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
+          
+        
+        
+          
+        
     </style>
 </head>
 <body>
@@ -123,11 +177,20 @@
 
     <div class="pb-container">
         <div class="pb-group" onclick="showHistory('Debit')">
-            <div class="pb-label" style="color: var(--blue);"><span>DEBIT / CASH</span> <span id="debitTxt">0%</span></div>
+            <div class="pb-label" style="color: var(--blue);">
+                <span style="text-align: left;">Debit Card Usage</span> 
+                <span id="debitSpentLabel">Spent: ₹0</span> 
+                <span id="debitTxt" style="text-align: right;">0%</span>
+            </div>
             <div class="pb-bg"><div id="debitFill" class="pb-fill" style="background: var(--blue);"></div></div>
         </div>
+
         <div class="pb-group" onclick="showHistory('Credit')">
-            <div class="pb-label" style="color: var(--red);"><span>CREDIT CARD</span> <span id="creditTxt">0%</span></div>
+            <div class="pb-label" style="color: var(--red);">
+                <span style="text-align: left;">Credit Card Usage</span> 
+                <span id="creditSpentLabel">Spent: ₹0</span> 
+                <span id="creditTxt" style="text-align: right;">0%</span>
+            </div>
             <div class="pb-bg"><div id="creditFill" class="pb-fill" style="background: var(--red);"></div></div>
         </div>
     </div>
@@ -168,15 +231,20 @@
     </div>
 
     <script>
+        
         let data = JSON.parse(localStorage.getItem('fin_v10')) || [];
+let liquidCash = 0; // <--- ADD THIS LINE
+const FIXED_CREDIT_LIMIT = 250000;
+
+
         const categories = [
             { id: 'Salary', name: 'Income', icon: '💰' }, { id: 'Investment', name: 'Assets', icon: '📈' },
-            { id: 'Rent', name: 'Housing', icon: '🏢' }, { id: 'Education', name: 'Learning', icon: '🎓' },
+            { id: 'Rent', name: 'Home & Rent', icon: '🏠' }, { id: 'Education', name: 'Learning', icon: '🎓' },
             { id: 'Kotak Saving', name: 'Savings', icon: '🏦' }, { id: 'Credit Card Bill', name: 'CC Bill', icon: '💳' },
             { id: 'Medicine', name: 'Health', icon: '💊' }, { id: 'Phone Bill', name: 'Telecom', icon: '📱' },
-            { id: 'LIC', name: 'Insurance', icon: '🛡️' }, { id: 'Cigarette', name: 'Personal', icon: '🚬' },
-            { id: 'Milk', name: 'Daily', icon: '🥛' }, { id: 'Zomato', name: 'Dining', icon: '🛵' },
-            { id: 'Swiggy', name: 'Food', icon: '🧡' }, { id: 'Pet', name: 'Pet Care', icon: '🐾' },
+            { id: 'LIC', name: 'Insurance', icon: '🛡️' }, { id: 'Cigarette', name: 'Personal', icon: '👤' },
+            { id: 'Milk', name: 'Daily', icon: '🥛' }, { id: 'Zomato', name: 'Entertainment', icon: '📺' },
+            { id: 'Swiggy', name: 'Swiggy', icon: '🍲' }, { id: 'Pet', name: 'Pet Care', icon: '🐾' },
             { id: 'Shopping', name: 'Lifestyle', icon: '🛍️' }, { id: 'Transport', name: 'Commute', icon: '🚗' },
             { id: 'Others', name: 'Misc', icon: '🌀' }
         ];
@@ -187,11 +255,18 @@
             const cycleStart = lastSal ? new Date(lastSal.date) : new Date(now.getFullYear(), now.getMonth(), 1);
             const daysLeft = Math.max(1, Math.ceil((new Date(now.getFullYear(), now.getMonth() + 1, 1) - now) / 864e5));
             
-            let spentThisCycle = 0, debitCycle = 0, creditCycle = 0, liquidCash = 0, totalDebt = 0, currSal = 0, sums = {};
+            
+            // 1. Remove liquidCash from this "let" list
+let spentThisCycle = 0, debitCycle = 0, creditCycle = 0, totalDebt = 0, currSal = 0, sums = {};
+
+// 2. Give it its own line below (without the word 'let')
+liquidCash = 0; 
+
+            
+            
 
             data.forEach(x => {
                 const v = parseFloat(x.amt);
-                // FIX: Case-insensitive method check
                 const m = (x.method || "").toLowerCase();
 
                 if (x.cat === 'Salary') { 
@@ -220,7 +295,6 @@
             document.getElementById('accBalance').innerText = `₹${liquidCash.toLocaleString()}`;
             
             const badge = document.getElementById('debtBadge');
-            // Using 0.5 to avoid floating point math display errors
             if(totalDebt > 0.5) { 
                 badge.style.display = 'block'; 
                 badge.innerText = `DEBT: ₹${Math.round(totalDebt).toLocaleString()}`; 
@@ -228,52 +302,138 @@
                 badge.style.display = 'none'; 
             }
 
+            // Debit UI
             document.getElementById('debitFill').style.width = (currSal > 0 ? (debitCycle/currSal)*100 : 0) + '%';
-            document.getElementById('creditFill').style.width = (currSal > 0 ? (creditCycle/currSal)*100 : 0) + '%';
+            document.getElementById('debitSpentLabel').innerText = `Spent: ₹${Math.round(debitCycle).toLocaleString()}`;
             document.getElementById('debitTxt').innerText = (currSal > 0 ? (debitCycle/currSal)*100 : 0).toFixed(1) + '%';
-            document.getElementById('creditTxt').innerText = (currSal > 0 ? (creditCycle/currSal)*100 : 0).toFixed(1) + '%';
 
-            let catH = "";
-            categories.filter(c => c.id !== 'Salary').forEach(c => {
-                catH += `<div class="cat-item" onclick="showHistory('${c.id}')"><span style="font-size:1.3rem">${c.icon}</span><span class="cat-display-name">${c.name}</span><span class="cat-amt">₹${(sums[c.id] || 0).toLocaleString()}</span></div>`;
-            });
+            // Credit UI (Corrected to FIXED_CREDIT_LIMIT)
+            document.getElementById('creditFill').style.width = (creditCycle / FIXED_CREDIT_LIMIT * 100) + '%';
+            document.getElementById('creditSpentLabel').innerText = `Spent: ₹${Math.round(creditCycle).toLocaleString()}`;
+            document.getElementById('creditTxt').innerText = (creditCycle / FIXED_CREDIT_LIMIT * 100).toFixed(1) + '%';
+
+        
+               let catH = "";
+       categories.filter(c => c.id !== 'Salary').forEach(c => {
+           const total = sums[c.id] || 0;
+           // Calculate the ratio of spend vs remaining cash
+           const ratio = (liquidCash > 0) ? (total / liquidCash) : 0;
+           let glow = "";
+
+           if (total > 0) {
+               if (ratio > 0.20) {
+                   glow = "glow-red";    // If spend is > 20% of cash, use RED
+               } else if (ratio > 0.10) {
+                   glow = "glow-orange"; // If spend is > 10% of cash, use ORANGE
+               }
+           }
+
+           catH += `<div class="cat-item ${glow}" onclick="showHistory('${c.id}')">
+                       <span style="font-size:1.3rem">${c.icon}</span>
+                       <span class="cat-display-name">${c.name}</span>
+                       <span class="cat-amt">₹${total.toLocaleString()}</span>
+                    </div>`;
+       });
+
+
+            
+            
+            
+            
             document.getElementById('catGrid').innerHTML = catH;
             localStorage.setItem('fin_v10', JSON.stringify(data));
         }
 
+        
         function showHistory(f) { 
-            document.getElementById('history').style.display = 'block'; 
-            // Case-insensitive filtering for history
-            let filtered = f === 'all' ? data : data.filter(x => x.cat === f || (x.method || "").toLowerCase() === f.toLowerCase());
-            
-            let logTotal = filtered.reduce((acc, curr) => acc + (curr.cat !== 'Salary' ? curr.amt : 0), 0);
-            document.getElementById('logTotalAmt').innerText = `₹${logTotal.toLocaleString()}`;
+    document.getElementById('history').style.display = 'block'; 
+    let filtered = f === 'all' ? data : data.filter(x => x.cat === f || (x.method || "").toLowerCase() === f.toLowerCase());
+    
+    // Ensure numbers are treated as numbers
+    let logTotal = filtered.reduce((acc, curr) => acc + (curr.cat !== 'Salary' ? parseFloat(curr.amt) : 0), 0);
+    document.getElementById('logTotalAmt').innerText = `₹${logTotal.toLocaleString()}`;
 
-            document.getElementById('histList').innerHTML = [...filtered].reverse().map(x => `
-                <div class="log-card" style="border-left-color: ${(x.method || "").toLowerCase() === 'debit' ? 'var(--blue)' : 'var(--red)'}">
-                    <div class="log-info">
-                        <div>
-                            <b>${x.desc}</b>
-                            <span class="method-label" style="background:${(x.method || "").toLowerCase()==='debit'?'rgba(59,130,246,0.2)':'rgba(255,77,77,0.2)'}; color:${(x.method || "").toLowerCase()==='debit'?'var(--blue)':'var(--red)'}">${x.method}</span>
-                        </div>
-                        <small>${x.date} • ${x.cat}</small>
-                    </div>
-                    <div class="log-amt">
-                        <div>₹${x.amt.toLocaleString()}</div>
-                        <span class="del-btn" onclick="deleteItem(${x.id})">DELETE</span>
-                    </div>
-                </div>`).join('') || "<p style='text-align:center; opacity:0.3; padding-top:20px;'>No records</p>";
-        }
+    // 1. Calculate the percentage
+    const contribution = (liquidCash > 0) ? ((logTotal / liquidCash) * 100).toFixed(1) : 0;
+
+    // 2. DEFINE THE BOX (The missing part in your current code)
+    let h = `
+        <div style="border: 1px dashed var(--purple); padding: 12px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(168, 85, 247, 0.05);">
+            <span style="font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; font-weight: 900; letter-spacing: 1px;">Liquidity Drain</span>
+            <b style="color: var(--purple); font-size: 0.9rem;">${contribution}% of your cash</b>
+        </div>
+    `;
+
+    // 3. INJECT THE BOX + THE LIST
+    document.getElementById('histList').innerHTML = h + [...filtered].reverse().map(x => `
+        <div class="log-card" style="border-left-color: ${(x.method || "").toLowerCase() === 'debit' ? 'var(--blue)' : 'var(--red)'}">
+            <div class="log-info">
+                <div>
+                    <b>${x.desc}</b>
+                    <span class="method-label" style="background:${(x.method || "").toLowerCase()==='debit'?'rgba(59,130,246,0.2)':'rgba(255,77,77,0.2)'}; color:${(x.method || "").toLowerCase()==='debit'?'var(--blue)':'var(--red)'}">${x.method}</span>
+                </div>
+                <small>${x.date} • ${x.cat}</small>
+            </div>
+            <div class="log-amt">
+                <div>₹${parseFloat(x.amt).toLocaleString()}</div>
+                <span class="del-btn" onclick="deleteItem(${x.id})">DELETE</span>
+            </div>
+        </div>`).join('') || "<p style='text-align:center; opacity:0.3; padding-top:20px;'>No records</p>";
+}
+
+        
+        
+        
 
         function deleteItem(id) { if(confirm("Delete this?")) { data = data.filter(x => x.id !== id); update(); showHistory('all'); } }
-        function openModal() { document.getElementById('modal').style.display = 'block'; document.getElementById('date').valueAsDate = new Date(); }
+        
+        
+        
+        
+        function openModal() { 
+    // Add these two lines to clear the text and amount
+    document.getElementById('desc').value = ''; 
+    document.getElementById('amt').value = ''; 
+
+    // The rest of your code
+    document.getElementById('modal').style.display = 'block'; 
+    document.getElementById('date').valueAsDate = new Date(); 
+}
+
+        
+        
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function closeHistory() { document.getElementById('history').style.display = 'none'; }
         function save() {
             const d = document.getElementById('desc').value, a = document.getElementById('amt').value, c = document.getElementById('catSelect').value, m = document.getElementById('method').value, dt = document.getElementById('date').value;
-            if(d && a && dt) { data.push({ id: Date.now(), desc: d, amt: parseFloat(a), cat: c, method: m, date: dt }); closeModal(); update(); }
+            if(d && a && dt) { data.push({ id: Date.now(), desc: d, amt: parseFloat(a), cat: c, method: m, date: dt }); 
+            
+            
+            
+            closeModal(); update(); }
         }
-        function exportCSV() { let csv = "Date,Desc,Cat,Method,Amt\n"; data.forEach(x => csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`); window.open('data:text/csv;charset=utf-8,' + encodeURI(csv)); }
+                function exportCSV() {
+            let csv = "Date,Desc,Cat,Method,Amt\n";
+            data.forEach(x => {
+                csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`;
+            });
+
+            // Create a file-like object (Blob)
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create a temporary link and click it to trigger the download
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "My_Finance_Data.csv");
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
         document.getElementById('catSelect').innerHTML = categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
         update();
     </script>
