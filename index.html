@@ -419,18 +419,23 @@ liquidCash = 0;
                 csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`;
             });
 
-            // Using Clipboard because APKs block file downloads
-            navigator.clipboard.writeText(csv).then(() => {
-                alert("✅ CSV copied to clipboard! You can now paste it into Excel, Sheets, or a Note.");
-            }).catch(err => {
-                alert("Copy failed. Please check app permissions.");
-            });
+            // Create a file-like object (Blob)
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create a temporary link and click it to trigger the download
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "My_Finance_Data.csv");
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
-        // Initialize the category dropdown icons and names
-        document.getElementById('catSelect').innerHTML = categories.map(c => 
-            `<option value="${c.id}">${c.icon} ${c.name}</option>`
-        ).join('');
+        document.getElementById('catSelect').innerHTML = categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
 
         // Initial call to load saved data and update the UI
         update();
