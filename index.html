@@ -418,6 +418,14 @@ liquidCash = 0;
                 csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`;
             });
 
+                      // ADD THIS PART BELOW:
+    navigator.clipboard.writeText(csv).then(() => {
+        alert("✅ CSV copied to clipboard! You can now paste it into Excel, Sheets, or a Note.");
+    }).catch(err => {
+        alert("Copy failed. Make sure the app has clipboard permissions.");
+    });
+                }
+
             // Create a file-like object (Blob)
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
