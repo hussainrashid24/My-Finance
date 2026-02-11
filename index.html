@@ -1,434 +1,685 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <!-- =========================
+         APP META & VIEWPORT
+    ========================== -->
+
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Finance Intelligence Pro</title>
+
+    <!-- =========================
+         DESIGN SYSTEM (CSS)
+    ========================== -->
+
     <style>
-        :root {
-            --purple: #a855f7; --bg: #0b0f1a; --card: #161e31; --text: #ffffff;
-            --red: #ff4d4d; --blue: #3b82f6; --green: #00ff9d; --input-bg: #1e293b;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); 
-            margin: 0; padding: 15px; padding-bottom: 90px; overflow-x: hidden;
-        }
 
-        /* Intelligence Header */
-        .intel-header { 
-            background: linear-gradient(135deg, #1e293b, #0f172a); padding: 25px 18px; 
-            border-radius: 24px; text-align: center;
-            margin-top: 30px; 
-            margin-bottom: 15px; border: 1px solid #334155; 
-        }
-        .daily-budget { color: var(--green); font-size: 2.5rem; font-weight: 900; margin: 5px 0; text-shadow: 0 0 15px rgba(0,255,157,0.3); }
-        .days-meta { font-size: 0.65rem; opacity: 0.6; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+                 /* =========================
+                      THEME VARIABLES
+                   ========================== */
 
-        /* FIXED: Inset Neon Cards */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .stat-card { 
-            background: var(--card); padding: 22px; border-radius: 20px; 
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative; overflow: hidden; transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 0 var(--purple);
-        }
-        .stat-card:nth-child(2) { box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 0 var(--green); }
-        .stat-card:active { transform: scale(0.95); }
-        
-        .debt-badge { 
-            position: absolute; top: 5px; right: 10px; background: var(--red); 
-            color: white; font-size: 0.5rem; padding: 2px 6px; border-radius: 6px; 
-            font-weight: 900; display: none;
-        }
+                      :root {
+                          --purple: #a855f7; --bg: #1e293b; --card: #1e293b; --text: #ffffff;
+                          --red: #ff4d4d; --blue: #3b82f6; --green: #00ff9d; --input-bg: #1e293b;
+                      }
 
-        .stat-val { font-size: 1.2rem; font-weight: 900; display: block; margin-top: 4px; }
-        .stat-name { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; font-weight: bold; }
+                      /* =========================
+                      BASE RESET & BODY
+                   ========================== */
 
-        /* Adjusted: Grid for perfect center alignment */
-        .pb-container { margin-bottom: 25px; padding: 0 5px; }
-        .pb-group { cursor: pointer; margin-bottom: 20px; }
-        .pb-label { 
-            font-size: 0.72rem; 
-            font-weight: 900; 
-            margin-bottom: 8px; 
-            display: grid; 
-            grid-template-columns: 1fr auto 1fr; 
-            align-items: center; 
-        }
-        .pb-bg { width: 100%; height: 22px; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .pb-fill { height: 100%; width: 0%; transition: width 1s ease-out; border-radius: 10px; }
+                      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
-        /* Category Grid */
-        .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 5px; }
-        .cat-item { 
-            background: rgba(255,255,255,0.03); padding: 10px 5px; border-radius: 25px; 
-            text-align: center; border: 1px solid rgba(255,255,255,0.05);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.2s; height: 60px;
-        }
-        .cat-item:active { transform: scale(0.85); background: rgba(168, 85, 247, 0.15); }
-        .cat-display-name { font-size: 0.5rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; margin-top: 6px; }
-        .cat-amt { font-size: 0.75rem; font-weight: 900; }
+                      body {
+                          font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text);
+                          margin: 0; padding: 15px; padding-bottom: 90px; overflow-x: hidden;
+                      }
 
-                /* Activity Log Cards */
-        #history, #modal { 
-            display:none; 
-            position:fixed; 
-            top:0; 
-            left:0; 
-            width:100%; 
-            height:100%; 
-            background:rgba(0,0,0,0.92); 
-            z-index:1000; 
-            backdrop-filter: blur(12px); 
-            overflow-y: auto; /* Adds scrolling for the whole modal */
-        }
-        .sheet { 
-            position: relative; /* Changed from absolute */
-            margin-top: 5vh;    /* Pushes it down so it's not glued to the top */
-            width: 100%; 
-            background: var(--bg); 
-            border-top: 3px solid var(--purple); 
-            border-radius: 30px 30px 0 0; 
-            padding: 25px; 
-            min-height: 95vh; 
-            animation: sheetUp 0.3s ease-out; 
-        }
-        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+                       /* =========================
+                      HEADER / DAILY INTEL
+                   ========================== */
+
+                      .intel-header {
+                          background: linear-gradient(135deg, #1e293b, #0f172a);
+                          aspect-ratio: 1.58 / 1;
+                          padding: 25px;
+                          border-radius: 28px;
+                          position: relative;
+                          margin: 10px 0  25px 0;
+                          border: 1px solid var(--border);
+                          display: flex;
+                          flex-direction: column;
+                          justify-content: center;
+                          align-items: center;
+                          text-align: center;
+                          margin-top: 24px;
+                          margin-bottom: 15px; border: 1px solid #334155;
+                      }
+
+                      .card-chip {
+          /* 1. Positioning on the card */
+          position: absolute;
+          top: 30%;
+          left: 20px;
+          transform: translateY(-50%);
+          width: 52px;
+          height: 40px;
+          border-radius: 7px;
+          z-index: 5;
+
+          /* 2. Metallic Texture & Gold Gradient */
+          background:
+              repeating-radial-gradient(circle at 0% 0%, transparent 0, rgba(0,0,0,0.03) 2px),
+              conic-gradient(from 120deg at 50% 50%, #bd922d 0%, #f5d179 25%, #bd922d 50%, #f9e394 75%, #bd922d 100%);
+
+          /* 3. Physical Depth (The 'Stamped' Look) */
+          box-shadow:
+              inset 0 2px 3px rgba(0,0,0,0.3),
+              0 1px 1px rgba(255,255,255,0.3);
+
+          border: 0.5px solid #8a6d1d;
+          overflow: hidden;
+      }
+
+      /* 4. The Micro-Circuit Logic (The SVG Traces) */
+      .card-chip::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='40' viewBox='0 0 52 40'%3E%3Cpath d='M0 14h14v-4h4v4h16v-4h4v4h14M0 26h14v4h4v-4h16v4h4v-4h14M16 0v10M36 0v10M16 30v10M36 30v10M14 14v12M38 14v12M22 14v12M30 14v12' fill='none' stroke='rgba(0,0,0,0.35)' stroke-width='0.8'/%3E%3Cpath d='M1 15h13v-4h4v4h16v-4h4v4h13M1 27h13v4h4v-4h16v4h4v-4h13' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='0.8'/%3E%3Crect x='21' y='17' width='10' height='6' rx='1' fill='rgba(0,0,0,0.05)' stroke='rgba(0,0,0,0.2)' stroke-width='0.5'/%3E%3C/svg%3E");
+          background-size: cover;
+      }
+
+                      .daily-budget { color: var(--green); font-size: 2.5rem; font-weight: 900; margin: 5px 0; text-shadow: 0 0 15px rgba(0,255,157,0.3); }
+                      .days-meta { font-size: 0.65rem; opacity: 0.6; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+
+                    /* =========================
+                      STATS CARDS
+                   ========================== */
+
+                      .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+                      .stat-card {
+                          background: var(--card); padding: 22px; border-radius: 20px;
+                          border: 1px solid rgba(255,255,255,0.05);
+                          position: relative; overflow: hidden; transition: 0.3s;
+                          box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 0 var(--purple);
+                      }
+                      .stat-card:nth-child(2) { box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 0 var(--green); }
+                      .stat-card:active { transform: scale(0.95); }
+
+                      .debt-badge {
+                          position: absolute; top: 10px; right: 30px; background: var(--red);
+                          color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 6px;
+                          font-weight: 900; display: none;
+                      }
+
+                      .stat-val { font-size: 1.2rem; font-weight: 900; display: block; margin-top: 4px; }
+                      .stat-name { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; font-weight: bold; }
+
+                      /* =========================
+                      PROGRESS BARS
+                   ========================== */
+
+                      .pb-container { margin-bottom: 25px; padding: 0 5px; }
+                      .pb-group { cursor: pointer; margin-bottom: 20px; }
+                      .pb-label {
+                          font-size: 0.72rem;
+                          font-weight: 900;
+                          margin-bottom: 8px;
+                          display: grid;
+                          grid-template-columns: 1fr auto 1fr;
+                          align-items: center;
+                      }
+                      .pb-bg { width: 100%; height: 22px; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+                      .pb-fill { height: 100%; width: 0%; transition: width 1s ease-out; border-radius: 10px; }
 
 
-        .log-summary { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
-        .log-summary span { font-size: 0.7rem; font-weight: 900; opacity: 0.6; text-transform: uppercase; }
-        .log-summary b { font-size: 1.2rem; color: var(--green); }
+                  /* =========================
+                      CATEGORY GRID
+                   ========================== */
 
-        .log-card {
-            background: var(--card); padding: 18px; border-radius: 22px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid var(--purple);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .log-info b { font-size: 1.1rem; display: block; margin-bottom: 3px; }
-        .log-info small { opacity: 0.6; font-size: 0.7rem; font-weight: bold; }
-        
-        .method-label {
-            display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem;
-            font-weight: 900; text-transform: uppercase; margin-left: 5px; vertical-align: middle;
-        }
+                      .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 5px; }
+                      .cat-item {
+                          background: rgba(255,255,255,0.03); padding: 10px 5px; border-radius: 25px;
+                          text-align: center; border: 1px solid rgba(255,255,255,0.05);
+                          display: flex; flex-direction: column; align-items: center; justify-content: center;
+                          transition: 0.2s; height: 60px;
+                      }
+                      .cat-item:active { transform: scale(0.85); background: rgba(168, 85, 247, 0.15); }
+                      .cat-display-name { font-size: 0.5rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; margin-top: 6px; }
+                      .cat-amt { font-size: 0.75rem; font-weight: 900; }
 
-        .log-amt { text-align: right; }
-        .log-amt div { font-size: 1.25rem; font-weight: 900; }
-        .del-btn { color: var(--red); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-top: 6px; cursor: pointer; display: block; }
 
-        /* Form Fields */
-        .field-box { margin-bottom: 18px; position: relative; }
-        .field-label { display: block; font-size: 0.65rem; font-weight: 900; color: var(--purple); text-transform: uppercase; margin-bottom: 8px; }
-        input, select { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #334155; background: var(--input-bg); color: white; font-size: 1rem; appearance: none; }
-        .select-wrapper::after { content: '▼'; font-size: 0.6rem; color: var(--purple); position: absolute; right: 18px; bottom: 20px; pointer-events: none; }
-        .btn-save { width: 100%; padding: 20px; background: var(--purple); border: none; color: white; border-radius: 18px; font-weight: 900; font-size: 1.1rem; box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3); }
 
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11, 15, 26, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid #334155; z-index: 100; }
-        .add-btn { background: var(--purple); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: white; margin-top: -50px; border: 6px solid var(--bg); box-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
-        
-              /* ADD THIS BLOCK BELOW */
-        .glow-orange { 
-            box-shadow: 0 0 15px rgba(255, 165, 0, 0.6) !important; 
-            border: 1px solid rgba(255, 165, 0, 0.9) !important; 
-            background: rgba(255, 165, 0, 0.1) !important;
-        }
+            /* =========================
+                      MODALS & SHEETS
+                   ========================== */
 
-   /* PASTE THE RED BLOCK HERE */
-        .glow-red { 
-            box-shadow: 0 0 20px rgba(255, 77, 77, 0.7) !important; 
-            border: 1px solid rgba(255, 77, 77, 1) !important; 
-            background: rgba(255, 77, 77, 0.15) !important;
-            animation: pulse-red 1.5s infinite; 
-        }
+                      #history, #modal {
+                          display:none;
+                          position:fixed;
+                          top:0;
+                          left:0;
+                          width:100%;
+                          height:100%;
+                          background:rgba(0,0,0,0.92);
+                          z-index:1000;
+                          backdrop-filter: blur(12px);
+                          overflow-y: auto; /* Adds scrolling for the whole modal */
+                      }
+                      .sheet {
+                          position: relative; /* Changed from absolute */
+                          margin-top: 5vh;    /* Pushes it down so it's not glued to the top */
+                          width: 100%;
+                          background: var(--bg);
+                          border-top: 3px solid var(--purple);
+                          border-radius: 30px 30px 0 0;
+                          padding: 25px;
+                          min-height: 95vh;
+                          animation: sheetUp 0.3s ease-out;
+                      }
+                      @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
-          
-        
-        
-          
-        
+
+                      .log-summary { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
+                      .log-summary span { font-size: 0.7rem; font-weight: 900; opacity: 0.6; text-transform: uppercase; }
+                      .log-summary b { font-size: 1.2rem; color: var(--green); }
+
+                      .log-card {
+                          background: var(--card); padding: 18px; border-radius: 22px; margin-bottom: 12px;
+                          display: flex; justify-content: space-between; align-items: center;
+                          border-left: 5px solid var(--purple);
+                          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                      }
+                      .log-info b { font-size: 1.1rem; display: block; margin-bottom: 3px; }
+                      .log-info small { opacity: 0.6; font-size: 0.7rem; font-weight: bold; }
+
+                      .method-label {
+                          display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem;
+                          font-weight: 900; text-transform: uppercase; margin-left: 5px; vertical-align: middle;
+                      }
+
+                      .log-amt { text-align: right; }
+                      .log-amt div { font-size: 1.25rem; font-weight: 900; }
+                      .del-btn { color: var(--red); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-top: 6px; cursor: pointer; display: block; }
+
+                      /* Form Fields */
+                      .field-box { margin-bottom: 18px; position: relative; }
+                      .field-label { display: block; font-size: 0.65rem; font-weight: 900; color: var(--purple); text-transform: uppercase; margin-bottom: 8px; }
+                      input, select { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #334155; background: var(--input-bg); color: white; font-size: 1rem; appearance: none; }
+                      .select-wrapper::after { content: '▼'; font-size: 0.6rem; color: var(--purple); position: absolute; right: 18px; bottom: 20px; pointer-events: none; }
+                      .btn-save { width: 100%; padding: 20px; background: var(--purple); border: none; color: white; border-radius: 18px; font-weight: 900; font-size: 1.1rem; box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3); }
+
+                      .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(11, 15, 26, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid #334155; z-index: 100; }
+                      .add-btn { background: var(--purple); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: white; margin-top: -50px; border: 6px solid var(--bg); box-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
+
+                            /* ADD THIS BLOCK BELOW */
+                      .glow-orange {
+                          box-shadow: 0 0 15px rgba(255, 165, 0, 0.6) !important;
+                          border: 1px solid rgba(255, 165, 0, 0.9) !important;
+                          background: rgba(255, 165, 0, 0.1) !important;
+                      }
+
+                 /* PASTE THE RED BLOCK HERE */
+                      .glow-red {
+                          box-shadow: 0 0 20px rgba(255, 77, 77, 0.7) !important;
+                          border: 1px solid rgba(255, 77, 77, 1) !important;
+                          background: rgba(255, 77, 77, 0.15) !important;
+                          animation: pulse-red 1.5s infinite;
+                      }
+
+                      @keyframes pulse-red {
+                          0% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
     </style>
-</head>
-<body>
-
-    <div class="intel-header">
-        <span class="days-meta" id="daysLeft">...</span>
-        <div class="daily-budget" id="dailyLimit">₹0</div>
-        <span style="font-size: 0.65rem; color: var(--purple); font-weight: 900; text-transform: uppercase;">Daily Allowance</span>
+  </head>
+  <body>
+    <!-- SWAPPED: Header now shows Liquid Cash -->
+    <div
+      class="intel-header"
+      style="position: relative; text-align: center; overflow: hidden"
+    >
+      <div class="card-chip"></div>
+      <div id="debtBadge" class="debt-badge">DEBT: ₹0</div>
+      <span class="days-meta" id="daysLeft"
+      style="display: inline-block; transform: translatex=(5px)"
+      >...</span>
+      <div class="daily-budget" id="accBalance" style="margin-left: 0px">
+        ₹0
+      </div>
+      <span
+        style="
+          font-size: 0.65rem;
+          color: var(--purple);
+          font-weight: 900;
+          text-transform: uppercase;
+          margin-left: 10px;
+          display: inline-block;
+        "
+        >Available Cash</span
+      >
     </div>
 
+    <!-- SWAPPED: Stats row now shows Daily Allowance in place of Liquid Cash -->
     <div class="stats-row">
-        <div class="stat-card" onclick="showHistory('all')">
-            <span class="stat-name">Cycle Spent</span>
-            <span class="stat-val" id="totalSpent">₹0</span>
-        </div>
-        <div class="stat-card">
-            <div id="debtBadge" class="debt-badge">DEBT: ₹0</div>
-            <span class="stat-name">Liquid Cash</span>
-            <span class="stat-val" id="accBalance">₹0</span>
-        </div>
+      <div class="stat-card" onclick="showHistory('all')">
+        <span class="stat-name">Cycle Spent</span>
+        <span class="stat-val" id="totalSpent">₹0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-name">Daily Allowance</span>
+        <span class="stat-val" id="dailyLimit">₹0</span>
+      </div>
     </div>
 
     <div class="pb-container">
-        <div class="pb-group" onclick="showHistory('Debit')">
-            <div class="pb-label" style="color: var(--blue);">
-                <span style="text-align: left;">Debit Card Usage</span> 
-                <span id="debitSpentLabel">Spent: ₹0</span> 
-                <span id="debitTxt" style="text-align: right;">0%</span>
-            </div>
-            <div class="pb-bg"><div id="debitFill" class="pb-fill" style="background: var(--blue);"></div></div>
+      <div class="pb-group" onclick="showHistory('Debit')">
+        <div class="pb-label" style="color: var(--blue)">
+          <span style="text-align: left">Debit Card Usage</span>
+          <span id="debitSpentLabel">Spent: ₹0</span>
+          <span id="debitTxt" style="text-align: right">0%</span>
         </div>
+        <div class="pb-bg">
+          <div
+            id="debitFill"
+            class="pb-fill"
+            style="background: var(--blue)"
+          ></div>
+        </div>
+      </div>
 
-        <div class="pb-group" onclick="showHistory('Credit')">
-            <div class="pb-label" style="color: var(--red);">
-                <span style="text-align: left;">Credit Card Usage</span> 
-                <span id="creditSpentLabel">Spent: ₹0</span> 
-                <span id="creditTxt" style="text-align: right;">0%</span>
-            </div>
-            <div class="pb-bg"><div id="creditFill" class="pb-fill" style="background: var(--red);"></div></div>
+      <div class="pb-group" onclick="showHistory('Credit')">
+        <div class="pb-label" style="color: var(--red)">
+          <span style="text-align: left">Credit Card Usage</span>
+          <span id="creditSpentLabel">Spent: ₹0</span>
+          <span id="creditTxt" style="text-align: right">0%</span>
         </div>
+        <div class="pb-bg">
+          <div
+            id="creditFill"
+            class="pb-fill"
+            style="background: var(--red)"
+          ></div>
+        </div>
+      </div>
     </div>
 
     <div class="cat-grid" id="catGrid"></div>
 
     <nav class="nav">
-        <div onclick="showHistory('all')" style="text-align:center"><div style="font-size:1.2rem">📊</div><div style="font-size:0.6rem; font-weight:900; opacity:0.7">ACTIVITY</div></div>
-        <button class="add-btn" onclick="openModal()">+</button>
-        <div onclick="exportCSV()" style="text-align:center"><div style="font-size:1.2rem">📥</div><div style="font-size:0.6rem; font-weight:900; opacity:0.7">EXPORT</div></div>
+      <div onclick="showHistory('all')" style="text-align: center">
+        <div style="font-size: 1.2rem">📊</div>
+        <div style="font-size: 0.6rem; font-weight: 900; opacity: 0.7">
+          ACTIVITY
+        </div>
+      </div>
+      <button class="add-btn" onclick="openModal()">+</button>
+      <div onclick="exportCSV()" style="text-align: center">
+        <div style="font-size: 1.2rem">📥</div>
+        <div style="font-size: 0.6rem; font-weight: 900; opacity: 0.7">
+          EXPORT
+        </div>
+      </div>
     </nav>
 
     <div id="history">
-        <div class="sheet">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h1 style="margin:0; font-weight:900; color:var(--purple)">Activity Log</h1>
-                <button onclick="closeHistory()" style="background:var(--card); border:1px solid #334155; color:white; padding:10px 18px; border-radius:12px; font-weight:bold;">CLOSE</button>
-            </div>
-            <div id="logSumContainer" class="log-summary">
-                <span>Total Filtered</span>
-                <b id="logTotalAmt">₹0</b>
-            </div>
-            <div id="histList"></div>
+      <div class="sheet">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <h1 style="margin: 0; font-weight: 900; color: var(--purple)">
+            Activity Log
+          </h1>
+          <button
+            onclick="closeHistory()"
+            style="
+              background: var(--card);
+              border: 1px solid #334155;
+              color: white;
+              padding: 10px 18px;
+              border-radius: 12px;
+              font-weight: bold;
+            "
+          >
+            CLOSE
+          </button>
         </div>
+        <div id="logSumContainer" class="log-summary">
+          <span>Total Filtered</span>
+          <b id="logTotalAmt">₹0</b>
+        </div>
+        <div id="histList"></div>
+      </div>
     </div>
 
     <div id="modal">
-        <div class="sheet" style="height: auto;">
-            <h1 style="margin:0 0 20px 0; color:var(--purple); font-weight:900;">Add Transaction</h1>
-            <div class="field-box"><label class="field-label">Details</label><input type="text" id="desc" placeholder="e.g. Uber"></div>
-            <div class="field-box"><label class="field-label">Amount (₹)</label><input type="number" id="amt" placeholder="0"></div>
-            <div class="field-box select-wrapper"><label class="field-label">Date</label><input type="date" id="date"></div>
-            <div class="field-box select-wrapper"><label class="field-label">Method</label><select id="method"><option value="Debit">Debit / Cash</option><option value="Credit">Credit Card</option></select></div>
-            <div class="field-box select-wrapper"><label class="field-label">Category</label><select id="catSelect"></select></div>
-            <button class="btn-save" onclick="save()">SAVE TRANSACTION</button>
-            <div style="text-align:center; margin-top:20px; font-weight:bold; opacity:0.5" onclick="closeModal()">CANCEL</div>
+      <div class="sheet" style="height: auto">
+        <h1 style="margin: 0 0 20px 0; color: var(--purple); font-weight: 900">
+          Add Transaction
+        </h1>
+        <div class="field-box">
+          <label class="field-label">Details</label
+          ><input type="text" id="desc" placeholder="e.g. Uber" />
         </div>
+        <div class="field-box">
+          <label class="field-label">Amount (₹)</label
+          ><input type="number" id="amt" placeholder="0" />
+        </div>
+        <div class="field-box select-wrapper">
+          <label class="field-label">Date</label><input type="date" id="date" />
+        </div>
+        <div class="field-box select-wrapper">
+          <label class="field-label">Method</label
+          ><select id="method">
+            <option value="Debit">Debit / Cash</option>
+            <option value="Credit">Credit Card</option>
+          </select>
+        </div>
+        <div class="field-box select-wrapper">
+          <label class="field-label">Category</label
+          ><select id="catSelect"></select>
+        </div>
+        <button class="btn-save" onclick="save()">SAVE TRANSACTION</button>
+        <div
+          style="
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            opacity: 0.5;
+          "
+          onclick="closeModal()"
+        >
+          CANCEL
+        </div>
+      </div>
     </div>
 
     <script>
-        
-        let data = JSON.parse(localStorage.getItem('fin_v10')) || [];
-let liquidCash = 0; // <--- ADD THIS LINE
-const FIXED_CREDIT_LIMIT = 250000;
+      let data = JSON.parse(localStorage.getItem("fin_v10")) || [];
+      let liquidCash = 0; // <--- ADD THIS LINE
+      const FIXED_CREDIT_LIMIT = 250000;
 
+      const categories = [
+        { id: "Salary", name: "Income", icon: "💰" },
+        { id: "Investment", name: "Assets", icon: "📈" },
+        { id: "Rent", name: "Home & Rent", icon: "🏠" },
+        { id: "Education", name: "Learning", icon: "🎓" },
+        { id: "Kotak Saving", name: "Savings", icon: "🏦" },
+        { id: "Credit Card Bill", name: "CC Bill", icon: "💳" },
+        { id: "Medicine", name: "Health", icon: "💊" },
+        { id: "Phone Bill", name: "Telecom", icon: "📱" },
+        { id: "LIC", name: "Insurance", icon: "🛡️" },
+        { id: "Cigarette", name: "Personal", icon: "👤" },
+        { id: "Milk", name: "Daily", icon: "🥛" },
+        { id: "Zomato", name: "Entertainment", icon: "📺" },
+        { id: "Swiggy", name: "Swiggy", icon: "🍲" },
+        { id: "Pet", name: "Pet Care", icon: "🐾" },
+        { id: "Shopping", name: "Lifestyle", icon: "🛍️" },
+        { id: "Transport", name: "Commute", icon: "🚗" },
+        { id: "Others", name: "Misc", icon: "🌀" },
+      ];
 
-        const categories = [
-            { id: 'Salary', name: 'Income', icon: '💰' }, { id: 'Investment', name: 'Assets', icon: '📈' },
-            { id: 'Rent', name: 'Home & Rent', icon: '🏠' }, { id: 'Education', name: 'Learning', icon: '🎓' },
-            { id: 'Kotak Saving', name: 'Savings', icon: '🏦' }, { id: 'Credit Card Bill', name: 'CC Bill', icon: '💳' },
-            { id: 'Medicine', name: 'Health', icon: '💊' }, { id: 'Phone Bill', name: 'Telecom', icon: '📱' },
-            { id: 'LIC', name: 'Insurance', icon: '🛡️' }, { id: 'Cigarette', name: 'Personal', icon: '👤' },
-            { id: 'Milk', name: 'Daily', icon: '🥛' }, { id: 'Zomato', name: 'Entertainment', icon: '📺' },
-            { id: 'Swiggy', name: 'Swiggy', icon: '🍲' }, { id: 'Pet', name: 'Pet Care', icon: '🐾' },
-            { id: 'Shopping', name: 'Lifestyle', icon: '🛍️' }, { id: 'Transport', name: 'Commute', icon: '🚗' },
-            { id: 'Others', name: 'Misc', icon: '🌀' }
-        ];
+      function update() {
+        const now = new Date();
+        const lastSal = [...data].reverse().find((x) => x.cat === "Salary");
+        const cycleStart = lastSal
+          ? new Date(lastSal.date)
+          : new Date(now.getFullYear(), now.getMonth(), 1);
+        const daysLeft = Math.max(
+          1,
+          Math.ceil(
+            (new Date(now.getFullYear(), now.getMonth() + 1, 1) - now) / 864e5
+          )
+        );
 
-        function update() {
-            const now = new Date();
-            const lastSal = [...data].reverse().find(x => x.cat === 'Salary');
-            const cycleStart = lastSal ? new Date(lastSal.date) : new Date(now.getFullYear(), now.getMonth(), 1);
-            const daysLeft = Math.max(1, Math.ceil((new Date(now.getFullYear(), now.getMonth() + 1, 1) - now) / 864e5));
-            
-            
-            // 1. Remove liquidCash from this "let" list
-let spentThisCycle = 0, debitCycle = 0, creditCycle = 0, totalDebt = 0, currSal = 0, sums = {};
+        // 1. Remove liquidCash from this "let" list
+        let spentThisCycle = 0,
+          debitCycle = 0,
+          creditCycle = 0,
+          totalDebt = 0,
+          currSal = 0,
+          sums = {};
 
-// 2. Give it its own line below (without the word 'let')
-liquidCash = 0; 
+        // 2. Give it its own line below (without the word 'let')
+        liquidCash = 0;
 
-            
-            
+        data.forEach((x) => {
+          const v = parseFloat(x.amt);
+          const m = (x.method || "").toLowerCase();
 
-            data.forEach(x => {
-                const v = parseFloat(x.amt);
-                const m = (x.method || "").toLowerCase();
+          if (x.cat === "Salary") {
+            liquidCash += v;
+          } else if (x.cat === "Credit Card Bill") {
+            liquidCash -= v;
+            totalDebt -= v;
+          } else {
+            if (m === "debit") liquidCash -= v;
+            else if (m === "credit") totalDebt += v;
+          }
 
-                if (x.cat === 'Salary') { 
-                    liquidCash += v; 
-                } else if (x.cat === 'Credit Card Bill') { 
-                    liquidCash -= v; 
-                    totalDebt -= v; 
-                } else {
-                    if (m === 'debit') liquidCash -= v;
-                    else if (m === 'credit') totalDebt += v;
-                }
+          if (new Date(x.date) >= cycleStart) {
+            if (x.cat === "Salary") currSal += v;
+            else if (x.cat !== "Credit Card Bill") {
+              spentThisCycle += v;
+              if (m === "debit") debitCycle += v;
+              else if (m === "credit") creditCycle += v;
+              sums[x.cat] = (sums[x.cat] || 0) + v;
+            }
+          }
+        });
 
-                if (new Date(x.date) >= cycleStart) {
-                    if (x.cat === 'Salary') currSal += v;
-                    else if (x.cat !== 'Credit Card Bill') {
-                        spentThisCycle += v;
-                        if (m === 'debit') debitCycle += v; else if (m === 'credit') creditCycle += v;
-                        sums[x.cat] = (sums[x.cat] || 0) + v;
-                    }
-                }
-            });
+        document.getElementById(
+          "daysLeft"
+        ).innerText = `${daysLeft} DAYS REMAINING`;
+        document.getElementById("dailyLimit").innerText = `₹${Math.floor(
+          currSal > 0 ? (currSal - spentThisCycle) / daysLeft : 0
+        )}`;
+        document.getElementById(
+          "totalSpent"
+        ).innerText = `₹${spentThisCycle.toLocaleString()}`;
+        document.getElementById(
+          "accBalance"
+        ).innerText = `₹${liquidCash.toLocaleString()}`;
 
-            document.getElementById('daysLeft').innerText = `${daysLeft} DAYS REMAINING`;
-            document.getElementById('dailyLimit').innerText = `₹${Math.floor(currSal > 0 ? (currSal - spentThisCycle)/daysLeft : 0)}`;
-            document.getElementById('totalSpent').innerText = `₹${spentThisCycle.toLocaleString()}`;
-            document.getElementById('accBalance').innerText = `₹${liquidCash.toLocaleString()}`;
-            
-            const badge = document.getElementById('debtBadge');
-            if(totalDebt > 0.5) { 
-                badge.style.display = 'block'; 
-                badge.innerText = `DEBT: ₹${Math.round(totalDebt).toLocaleString()}`; 
-            } else { 
-                badge.style.display = 'none'; 
+        const badge = document.getElementById("debtBadge");
+        if (totalDebt > 0.5) {
+          badge.style.display = "block";
+          badge.innerText = `DEBT: ₹${Math.round(totalDebt).toLocaleString()}`;
+        } else {
+          badge.style.display = "none";
+        }
+
+        // Debit UI
+        document.getElementById("debitFill").style.width =
+          (currSal > 0 ? (debitCycle / currSal) * 100 : 0) + "%";
+        document.getElementById(
+          "debitSpentLabel"
+        ).innerText = `Spent: ₹${Math.round(debitCycle).toLocaleString()}`;
+        document.getElementById("debitTxt").innerText =
+          (currSal > 0 ? (debitCycle / currSal) * 100 : 0).toFixed(1) + "%";
+
+        // Credit UI (Corrected to FIXED_CREDIT_LIMIT)
+        document.getElementById("creditFill").style.width =
+          (creditCycle / FIXED_CREDIT_LIMIT) * 100 + "%";
+        document.getElementById(
+          "creditSpentLabel"
+        ).innerText = `Spent: ₹${Math.round(creditCycle).toLocaleString()}`;
+        document.getElementById("creditTxt").innerText =
+          ((creditCycle / FIXED_CREDIT_LIMIT) * 100).toFixed(1) + "%";
+
+        let catH = "";
+        categories
+          .filter((c) => c.id !== "Salary")
+          .forEach((c) => {
+            const total = sums[c.id] || 0;
+            // Calculate the ratio of spend vs remaining cash
+            const ratio = liquidCash > 0 ? total / liquidCash : 0;
+            let glow = "";
+
+            if (total > 0) {
+              if (ratio > 0.2) {
+                glow = "glow-red"; // If spend is > 20% of cash, use RED
+              } else if (ratio > 0.1) {
+                glow = "glow-orange"; // If spend is > 10% of cash, use ORANGE
+              }
             }
 
-            // Debit UI
-            document.getElementById('debitFill').style.width = (currSal > 0 ? (debitCycle/currSal)*100 : 0) + '%';
-            document.getElementById('debitSpentLabel').innerText = `Spent: ₹${Math.round(debitCycle).toLocaleString()}`;
-            document.getElementById('debitTxt').innerText = (currSal > 0 ? (debitCycle/currSal)*100 : 0).toFixed(1) + '%';
-
-            // Credit UI (Corrected to FIXED_CREDIT_LIMIT)
-            document.getElementById('creditFill').style.width = (creditCycle / FIXED_CREDIT_LIMIT * 100) + '%';
-            document.getElementById('creditSpentLabel').innerText = `Spent: ₹${Math.round(creditCycle).toLocaleString()}`;
-            document.getElementById('creditTxt').innerText = (creditCycle / FIXED_CREDIT_LIMIT * 100).toFixed(1) + '%';
-
-        
-               let catH = "";
-       categories.filter(c => c.id !== 'Salary').forEach(c => {
-           const total = sums[c.id] || 0;
-           // Calculate the ratio of spend vs remaining cash
-           const ratio = (liquidCash > 0) ? (total / liquidCash) : 0;
-           let glow = "";
-
-           if (total > 0) {
-               if (ratio > 0.20) {
-                   glow = "glow-red";    // If spend is > 20% of cash, use RED
-               } else if (ratio > 0.10) {
-                   glow = "glow-orange"; // If spend is > 10% of cash, use ORANGE
-               }
-           }
-
-           catH += `<div class="cat-item ${glow}" onclick="showHistory('${c.id}')">
+            catH += `<div class="cat-item ${glow}" onclick="showHistory('${
+              c.id
+            }')">
                        <span style="font-size:1.3rem">${c.icon}</span>
                        <span class="cat-display-name">${c.name}</span>
                        <span class="cat-amt">₹${total.toLocaleString()}</span>
                     </div>`;
-       });
+          });
 
+        document.getElementById("catGrid").innerHTML = catH;
+        localStorage.setItem("fin_v10", JSON.stringify(data));
+      }
 
-            
-            
-            
-            
-            document.getElementById('catGrid').innerHTML = catH;
-            localStorage.setItem('fin_v10', JSON.stringify(data));
-        }
+      function showHistory(f) {
+        document.getElementById("history").style.display = "block";
+        let filtered =
+          f === "all"
+            ? data
+            : data.filter(
+                (x) =>
+                  x.cat === f ||
+                  (x.method || "").toLowerCase() === f.toLowerCase()
+              );
 
-        
-        function showHistory(f) { 
-    document.getElementById('history').style.display = 'block'; 
-    let filtered = f === 'all' ? data : data.filter(x => x.cat === f || (x.method || "").toLowerCase() === f.toLowerCase());
-    
-    // Ensure numbers are treated as numbers
-    let logTotal = filtered.reduce((acc, curr) => acc + (curr.cat !== 'Salary' ? parseFloat(curr.amt) : 0), 0);
-    document.getElementById('logTotalAmt').innerText = `₹${logTotal.toLocaleString()}`;
+        // Ensure numbers are treated as numbers
+        let logTotal = filtered.reduce(
+          (acc, curr) =>
+            acc + (curr.cat !== "Salary" ? parseFloat(curr.amt) : 0),
+          0
+        );
+        document.getElementById(
+          "logTotalAmt"
+        ).innerText = `₹${logTotal.toLocaleString()}`;
 
-    // 1. Calculate the percentage
-    const contribution = (liquidCash > 0) ? ((logTotal / liquidCash) * 100).toFixed(1) : 0;
+        // 1. Calculate the percentage
+        const contribution =
+          liquidCash > 0 ? ((logTotal / liquidCash) * 100).toFixed(1) : 0;
 
-    // 2. DEFINE THE BOX (The missing part in your current code)
-    let h = `
+        // 2. DEFINE THE BOX (The missing part in your current code)
+        let h = `
         <div style="border: 1px dashed var(--purple); padding: 12px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(168, 85, 247, 0.05);">
             <span style="font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; font-weight: 900; letter-spacing: 1px;">Liquidity Drain</span>
             <b style="color: var(--purple); font-size: 0.9rem;">${contribution}% of your cash</b>
         </div>
     `;
 
-    // 3. INJECT THE BOX + THE LIST
-    document.getElementById('histList').innerHTML = h + [...filtered].reverse().map(x => `
-        <div class="log-card" style="border-left-color: ${(x.method || "").toLowerCase() === 'debit' ? 'var(--blue)' : 'var(--red)'}">
+        // 3. INJECT THE BOX + THE LIST
+        document.getElementById("histList").innerHTML =
+          h +
+            [...filtered]
+              .reverse()
+              .map(
+                (x) => `
+        <div class="log-card" style="border-left-color: ${
+          (x.method || "").toLowerCase() === "debit"
+            ? "var(--blue)"
+            : "var(--red)"
+        }">
             <div class="log-info">
                 <div>
                     <b>${x.desc}</b>
-                    <span class="method-label" style="background:${(x.method || "").toLowerCase()==='debit'?'rgba(59,130,246,0.2)':'rgba(255,77,77,0.2)'}; color:${(x.method || "").toLowerCase()==='debit'?'var(--blue)':'var(--red)'}">${x.method}</span>
+                    <span class="method-label" style="background:${
+                      (x.method || "").toLowerCase() === "debit"
+                        ? "rgba(59,130,246,0.2)"
+                        : "rgba(255,77,77,0.2)"
+                    }; color:${
+                  (x.method || "").toLowerCase() === "debit"
+                    ? "var(--blue)"
+                    : "var(--red)"
+                }">${x.method}</span>
                 </div>
                 <small>${x.date} • ${x.cat}</small>
             </div>
             <div class="log-amt">
                 <div>₹${parseFloat(x.amt).toLocaleString()}</div>
-                <span class="del-btn" onclick="deleteItem(${x.id})">DELETE</span>
+                <span class="del-btn" onclick="deleteItem(${
+                  x.id
+                })">DELETE</span>
             </div>
-        </div>`).join('') || "<p style='text-align:center; opacity:0.3; padding-top:20px;'>No records</p>";
-}
+        </div>`
+              )
+              .join("") ||
+          "<p style='text-align:center; opacity:0.3; padding-top:20px;'>No records</p>";
+      }
 
-        
-        
-        
-
-        function deleteItem(id) { if(confirm("Delete this?")) { data = data.filter(x => x.id !== id); update(); showHistory('all'); } }
-        
-        
-        
-        
-        function openModal() { 
-    // Add these two lines to clear the text and amount
-    document.getElementById('desc').value = ''; 
-    document.getElementById('amt').value = ''; 
-
-    // The rest of your code
-    document.getElementById('modal').style.display = 'block'; 
-    document.getElementById('date').valueAsDate = new Date(); 
-}
-
-        
-        
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function closeHistory() { document.getElementById('history').style.display = 'none'; }
-        function save() {
-            const d = document.getElementById('desc').value, a = document.getElementById('amt').value, c = document.getElementById('catSelect').value, m = document.getElementById('method').value, dt = document.getElementById('date').value;
-            if(d && a && dt) { data.push({ id: Date.now(), desc: d, amt: parseFloat(a), cat: c, method: m, date: dt }); 
-            
-            
-            
-            closeModal(); update(); }
+      function deleteItem(id) {
+        if (confirm("Delete this?")) {
+          data = data.filter((x) => x.id !== id);
+          update();
+          showHistory("all");
         }
+      }
 
-                function exportCSV() {
-    let csv = "Date,Desc,Cat,Method,Amt\n";
-    data.forEach(x => {
-        csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`;
-    });
+      function openModal() {
+        // Add these two lines to clear the text and amount
+        document.getElementById("desc").value = "";
+        document.getElementById("amt").value = "";
 
-    // Use a simple Data URI instead of a Blob to prevent the crash
-    const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    window.location.href = encodedUri;
-                }
-        
+        // The rest of your code
+        document.getElementById("modal").style.display = "block";
+        document.getElementById("date").valueAsDate = new Date();
+      }
 
-        document.getElementById('catSelect').innerHTML = categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+      function closeModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+      function closeHistory() {
+        document.getElementById("history").style.display = "none";
+      }
+      function save() {
+        const d = document.getElementById("desc").value,
+          a = document.getElementById("amt").value,
+          c = document.getElementById("catSelect").value,
+          m = document.getElementById("method").value,
+          dt = document.getElementById("date").value;
+        if (d && a && dt) {
+          data.push({
+            id: Date.now(),
+            desc: d,
+            amt: parseFloat(a),
+            cat: c,
+            method: m,
+            date: dt,
+          });
 
-        // Initial call to load saved data and update the UI
-        update();
+          closeModal();
+          update();
+        }
+      }
+
+      function exportCSV() {
+        let csv = "Date,Desc,Cat,Method,Amt\n";
+        data.forEach((x) => {
+          csv += `${x.date},${x.desc},${x.cat},${x.method},${x.amt}\n`;
+        });
+
+        // Use a simple Data URI instead of a Blob to prevent the crash
+        const encodedUri =
+          "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+        window.location.href = encodedUri;
+      }
+
+      document.getElementById("catSelect").innerHTML = categories
+        .map((c) => `<option value="${c.id}">${c.icon} ${c.name}</option>`)
+        .join("");
+
+      // Initial call to load saved data and update the UI
+      update();
     </script>
-</body>
+  </body>
 </html>
+     
