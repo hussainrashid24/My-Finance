@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- =========================
-         APP META & VIEWPORT
-    ========================== -->
+    <!-- ========================= APP META & VIEWPORT ========================== -->
 
     <meta charset="UTF-8" />
     <meta
@@ -12,24 +10,17 @@
     />
     <title>Finance Intelligence Pro</title>
 
-    <!-- =========================
-         DESIGN SYSTEM (CSS)
-    ========================== -->
+    <!-- ========================= DESIGN SYSTEM (CSS) ========================== -->
 
     <style>
-
-                 /* =========================
-                      THEME VARIABLES
-                   ========================== */
+                 /* ========================= THEME VARIABLES ========================== */
 
                       :root {
                           --purple: #a855f7; --bg: #1e293b; --card: #1e293b; --text: #ffffff;
                           --red: #ff4d4d; --blue: #3b82f6; --green: #00ff9d; --input-bg: #1e293b;
                       }
 
-                      /* =========================
-                      BASE RESET & BODY
-                   ========================== */
+                      /* ========================= BASE RESET & BODY ========================== */
 
                       * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
@@ -38,9 +29,7 @@
                           margin: 0; padding: 15px; padding-bottom: 90px; overflow-x: hidden;
                       }
 
-                       /* =========================
-                      HEADER / DAILY INTEL
-                   ========================== */
+                       /* ========================= HEADER / DAILY INTEL ========================== */
 
                       .intel-header {
                           background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -69,7 +58,7 @@
           height: 40px;
           border-radius: 7px;
           z-index: 5;
-
+                        
           /* 2. Metallic Texture & Gold Gradient */
           background:
               repeating-radial-gradient(circle at 0% 0%, transparent 0, rgba(0,0,0,0.03) 2px),
@@ -83,7 +72,6 @@
           border: 0.5px solid #8a6d1d;
           overflow: hidden;
       }
-
       /* 4. The Micro-Circuit Logic (The SVG Traces) */
       .card-chip::before {
           content: '';
@@ -92,13 +80,10 @@
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='40' viewBox='0 0 52 40'%3E%3Cpath d='M0 14h14v-4h4v4h16v-4h4v4h14M0 26h14v4h4v-4h16v4h4v-4h14M16 0v10M36 0v10M16 30v10M36 30v10M14 14v12M38 14v12M22 14v12M30 14v12' fill='none' stroke='rgba(0,0,0,0.35)' stroke-width='0.8'/%3E%3Cpath d='M1 15h13v-4h4v4h16v-4h4v4h13M1 27h13v4h4v-4h16v4h4v-4h13' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='0.8'/%3E%3Crect x='21' y='17' width='10' height='6' rx='1' fill='rgba(0,0,0,0.05)' stroke='rgba(0,0,0,0.2)' stroke-width='0.5'/%3E%3C/svg%3E");
           background-size: cover;
       }
-
                       .daily-budget { color: var(--green); font-size: 2.5rem; font-weight: 900; margin: 5px 0; text-shadow: 0 0 15px rgba(0,255,157,0.3); }
                       .days-meta { font-size: 0.65rem; opacity: 0.6; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
 
-                    /* =========================
-                      STATS CARDS
-                   ========================== */
+                    /* ========================= STATS CARDS ========================== */
 
                       .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
                       .stat-card {
@@ -119,9 +104,7 @@
                       .stat-val { font-size: 1.2rem; font-weight: 900; display: block; margin-top: 4px; }
                       .stat-name { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; font-weight: bold; }
 
-                      /* =========================
-                      PROGRESS BARS
-                   ========================== */
+                      /* ========================= PROGRESS BARS ========================== */
 
                       .pb-container { margin-bottom: 25px; padding: 0 5px; }
                       .pb-group { cursor: pointer; margin-bottom: 20px; }
@@ -136,10 +119,7 @@
                       .pb-bg { width: 100%; height: 22px; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
                       .pb-fill { height: 100%; width: 0%; transition: width 1s ease-out; border-radius: 10px; }
 
-
-                  /* =========================
-                      CATEGORY GRID
-                   ========================== */
+                  /* ========================= CATEGORY GRID ========================== */
 
                       .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 5px; }
                       .cat-item {
@@ -152,11 +132,7 @@
                       .cat-display-name { font-size: 0.5rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; margin-top: 6px; }
                       .cat-amt { font-size: 0.75rem; font-weight: 900; }
 
-
-
-            /* =========================
-                      MODALS & SHEETS
-                   ========================== */
+            /* ========================= MODALS & SHEETS ========================== */
 
                       #history, #modal {
                           display:none;
@@ -576,7 +552,6 @@
             <b style="color: var(--purple); font-size: 0.9rem;">${contribution}% of your cash</b>
         </div>
     `;
-
         // 3. INJECT THE BOX + THE LIST
         document.getElementById("histList").innerHTML =
           h +
@@ -682,4 +657,3 @@
     </script>
   </body>
 </html>
-     
