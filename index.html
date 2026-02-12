@@ -510,6 +510,8 @@
           sBadge.innerText = isBalanceHidden
             ? "SAVINGS: ₹ ••••"
             : `SAVINGS: ₹${totalSavings.toLocaleString("en-IN")}`;
+          sBadge.style.color = "#1A1A1A";
+          sBadge.style.fontWeight = "900";
         } else {
           sBadge.style.display = "none";
         }
