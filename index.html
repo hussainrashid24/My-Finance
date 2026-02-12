@@ -238,35 +238,19 @@
         onclick="toggleBalance()"
       ></div>
       <span
-  style="
-    font-size: 0.65rem;
-    color: var(--purple);
-    font-weight: 900;
-    text-transform: uppercase;
-    display: inline-block;
-    cursor: pointer;
-    position: relative;
-    /* Use negative margin to nudge the whole thing left if needed */
-    margin-left: 3px; 
-    white-space: nowrap;
-  "
-  onclick="toggleBalance()"
->
-  Available Cash
-  <span
-    id="eyeIcon"
-    style="
-      position: absolute;
-      left: 100%;
-      margin-left: 2px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.8rem;
-    "
-  ></span>
-</span>
-
-    </div>
+        style="
+          font-size: 0.65rem;
+          color: var(--purple);
+          font-weight: 900;
+          text-transform: uppercase;
+          margin-left: 10px;
+          display: inline-block;
+          cursor: pointer;
+        "
+        onclick="toggleBalance()"
+      >
+        Available Cash
+      </span>
     </div>
 
     <!-- SWAPPED: Stats row now shows Daily Allowance in place of Liquid Cash -->
@@ -511,15 +495,6 @@
           ? "₹ ••••"
           : `₹${liquidCash.toLocaleString("en-IN")}`;
 
-        document.getElementById("accBalanceContainer").innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
-        <span id="accBalance" style="font-size: 2rem; font-weight: bold;">${balanceText}</span>
-        <span id="eyeIcon" onclick="toggleBalance()" 
-              style="margin-left: 10px; font-size: 1.2rem; cursor: pointer; position: absolute; right: 0;">
-            ${isBalanceHidden ? "🔒" : "🔓"}
-        </span>
-    </div>
-`;
         const badge = document.getElementById("debtBadge");
         if (totalDebt > 0.5) {
           badge.style.display = "block";
