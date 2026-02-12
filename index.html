@@ -470,9 +470,7 @@
           } else {
             // THE FIX: Check if it's a "Debit" AND NOT a Saving/Investment
             if (m === "debit") {
-              if (x.cat !== "Kotak Saving") {
-                liquidCash -= v;
-              }
+              liquidCash -= v;
             } else if (m === "credit") {
               totalDebt += v;
             }
@@ -510,7 +508,7 @@
           sBadge.innerText = isBalanceHidden
             ? "SAVINGS: ₹ ••••"
             : `SAVINGS: ₹${totalSavings.toLocaleString("en-IN")}`;
-          sBadge.style.color = "#1A1A1A";
+          sBadge.style.color = "#003300";
           sBadge.style.fontWeight = "900";
         } else {
           sBadge.style.display = "none";
