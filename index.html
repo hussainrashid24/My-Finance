@@ -225,6 +225,21 @@
     >
       <div class="card-chip"></div>
       <div id="debtBadge" class="debt-badge">DEBT: ₹0</div>
+      <div
+        id="savingsBadge"
+        class="debt-badge"
+        style="
+          background: var(--green);
+          left: 25px;
+          top: 11px;
+          right: auto;
+          bottom: auto;
+          display: none;
+          cursor: pointer;
+        "
+      >
+        SAVINGS: ₹0
+      </div>
       <span
         class="days-meta"
         id="daysLeft"
@@ -482,6 +497,22 @@
           }
         }); // This closing brace ends the data.forEach loop
 
+        // 1. Calculate the total for Savings
+        const totalSavings = data
+          .filter((x) => x.cat === "Kotak Saving")
+          .reduce((acc, curr) => acc + parseFloat(curr.amt), 0);
+
+        const sBadge = document.getElementById("savingsBadge");
+        if (totalSavings > 0) {
+          sBadge.style.display = "block";
+
+          // 2. Hide or Show based on the eye icon status
+          sBadge.innerText = isBalanceHidden
+            ? "SAVINGS: ₹ ••••"
+            : `SAVINGS: ₹${totalSavings.toLocaleString("en-IN")}`;
+        } else {
+          sBadge.style.display = "none";
+        }
         document.getElementById(
           "daysLeft"
         ).innerText = `${daysLeft} DAYS REMAINING`;
@@ -547,12 +578,19 @@
               }
             }
 
-            catH += `<div class="cat-item ${glow}" onclick="showHistory('${
-              c.id
-            }')">
+            let displayAmt;
+
+            // Use the exact ID from your categories list
+            if (c.id === "Kotak Saving" && isBalanceHidden) {
+              displayAmt = "₹ ••••";
+            } else {
+              displayAmt = `₹${total.toLocaleString("en-IN")}`;
+            }
+
+            catH += `<div class="cat-item ${glow}" onclick="showHistory('${c.id}')">
                        <span style="font-size:1.3rem">${c.icon}</span>
                        <span class="cat-display-name">${c.name}</span>
-                       <span class="cat-amt">₹${total.toLocaleString()}</span>
+                       <span class="cat-amt">${displayAmt}</span> 
                     </div>`;
           });
 
